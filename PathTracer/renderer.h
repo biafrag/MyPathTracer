@@ -5,6 +5,9 @@
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
+#include "object.h"
+#include <vector>
+#include "light.h"
 
 class Renderer  : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
@@ -28,12 +31,12 @@ public:
 
     };
 
-    struct Sphere
-    {
-        QVector3D position;
-        float radius;
+//    struct Sphere
+//    {
+//        QVector3D position;
+//        float radius;
 
-    };
+//    };
 
     struct Material
     {
@@ -42,40 +45,26 @@ public:
         QVector3D color;
     };
 
-    struct Light
-    {
-        QVector3D position;
-        QVector3D ambient;
-        QVector3D diffuse;
-        QVector3D specular;
-        float shi;
-    };
+    QImage getRayTracedImage();
 
 private:
     void createScene();
-    void createSimpleScene();
-    void createSphere();
-    void drawZBuffer();
-    virtual void initializeGL();
-    virtual void paintGL();
-    virtual void resizeGL(int w, int h);
+    virtual void initializeGL() override;
+    virtual void paintGL() override;
+    virtual void resizeGL(int w, int h) override;
 
-    void createBuffers();
-    void updateVertexBuffer();
-    void updateTexBuffer();
+    //Parte do Arcball
+    QVector3D _p0, _p1; //pontos para fazer rotação
+    double _radius; //Sphere Radius
+    QVector3D Points_Sphere(QVector3D pointT);
 
-    void createVAO();
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
 
 
 private:
-    /**
-     * @brief
-     */
-    unsigned int _texCoordsBuffer = static_cast<unsigned int>(-1);
-    unsigned int _pointsBuffer = static_cast<unsigned int>(-1);
-    unsigned int _normalsBuffer = static_cast<unsigned int>(-1);
-    unsigned int _indicesBuffer = static_cast<unsigned int>(-1);
-
 
     /**
      * @brief
@@ -86,20 +75,18 @@ private:
     QMatrix4x4 _proj;
     QMatrix4x4 _view;
 
-    /**
-     * @brief OpenGL program used to render meshes without shading.
-     */
-    QOpenGLShaderProgram *_program {nullptr};
-
-    std::vector<QVector3D> _points;
-    std::vector<unsigned int> _indices;
-    std::vector<QVector3D> _normals;
-    std::vector<QVector3D> _texCoords;
-
-    QOpenGLVertexArrayObject _vao;
 
     Camera _camera;
 
+    //Mouse
+    float _percentzoom;
+    bool _mousepress = false;
 
+    Light _light;
+
+    std::vector<Light> _lights;
+    //Material _material;
+
+    std::vector<Object *> _objects;
 };
 

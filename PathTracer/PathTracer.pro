@@ -18,13 +18,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    object.cpp \
+    plane.cpp \
     raytracing.cpp \
-    renderer.cpp
+    renderer.cpp \
+    sphere.cpp
 
 HEADERS += \
+    light.h \
     mainwindow.h \
+    object.h \
+    plane.h \
     raytracing.h \
-    renderer.h
+    renderer.h \
+    sphere.h
 
 FORMS += \
     mainwindow.ui
