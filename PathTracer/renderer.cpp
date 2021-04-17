@@ -4,18 +4,20 @@
 #include "raytracing.h"
 #include "sphere.h"
 #include "plane.h"
+#include "trianglemesh.h"
+#include "readerOBJ.h"
 
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
     _camera.center = QVector3D(0.f,0.f,0.f);
-    _camera.eye =  QVector3D(0.f,0.f,5.f);
+    _camera.eye =  QVector3D(0.f,0.f,50.f);
     _camera.up = QVector3D(0.f,2.f,0.f);
     _camera.zNear = 0.1f;
     _camera.zFar  = 100.f;
     _camera.fov  = 60.f;
 
-    _light.position = {-5, 5, 5};
+    _light.position = {0, 50, 0};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {1.0f,  1.0f,1.0f};
@@ -30,7 +32,7 @@ Renderer::Renderer(QWidget *parent)
 
     _lights.push_back(_light);
 
-    _lights.push_back(light2);
+    //_lights.push_back(light2);
 
 
 }
@@ -45,16 +47,7 @@ QImage Renderer::getRayTracedImage()
     std::vector<QVector3D> vertices;
     std::vector<QVector3D> normals;
 
-//    int i = 0;
-//    for(auto vertice : _points)
-//    {
-//        vertices.push_back(_model * vertice);
-//        normals.push_back(_model.transposed().inverted()* _normals[i]);
-//        i++;
-//    }
-
-
-    return r.generateRayTracingImage(width(), height(), _model, _proj, _camera, _objects, _light);
+    return r.generateRayTracingImage(width(), height(), _model, _view, _proj, _camera, _objects, _lights);
 
 }
 
@@ -139,7 +132,16 @@ void Renderer::mouseMoveEvent(QMouseEvent *event)
 
 void Renderer::wheelEvent(QWheelEvent *event)
 {
-
+    //Aqui o zoom
+      if(event->delta() > 0) //Quer dizer que estou rolando para cima-> zoom in
+      {
+         _camera.eye = _camera.eye*0.8;
+      }
+      else if(event->delta() < 0) //Quer dizer que estou rolando para baixo-> zoom out
+      {
+           _camera.eye = _camera.eye/0.8;
+      }
+      update();
 }
 
 
@@ -219,13 +221,64 @@ void Renderer::initializeGL()
     initializeOpenGLFunctions();
     makeCurrent();
 
-    Plane *p =  new Plane();
+    QMatrix4x4 rot, trans, scale;
+    scale.scale(QVector3D(4, 4, 4));
+    rot.rotate(90, QVector3D(1, 0 , 0));
+    trans.translate(QVector3D(0, -2, 0));
+    Plane *p =  new Plane(trans, rot, scale);
+    Object::Material material;
+    material.color = QVector3D(1, 1, 0);
+    p->setMaterial(material);
     _objects.push_back(p);
 
     Sphere *s =  new Sphere();
-    _objects.push_back(s);
+    //_objects.push_back(s);
+
+    rot.setToIdentity();
+    rot.rotate(90, QVector3D(0, 1 , 0));
+    trans.setToIdentity();
+    trans.translate(QVector3D(2, -1, 0));
+    scale.setToIdentity();
+    scale.scale(QVector3D(2, 2, 1));
 
 
+    Plane *p2 =  new Plane(trans, rot, scale);
+    material.color = QVector3D(1,0.5,0.1);
+    p2->setMaterial(material);
+   // _objects.push_back(p2);
+
+    rot.setToIdentity();
+    rot.rotate(90, QVector3D(0, 0 , 1));
+    trans.setToIdentity();
+    trans.translate(QVector3D(0, -1, -3));
+    scale.setToIdentity();
+    scale.scale(QVector3D(2, 2, 1));
+
+    Plane *p3 =  new Plane(trans, rot, scale);
+    material.color = QVector3D(0.4,0.8,0.5);
+    //material.isReflective = true;
+    p3->setMaterial(material);
+    //_objects.push_back(p3);
+
+    std::vector<QVector3D> points;
+    std::vector<unsigned int> indicesTri;
+    std::vector<unsigned int> indicesQuad;
+    std::vector<unsigned int> indicesNormalsTri;
+    std::vector<unsigned int> indicesNormalsQuad;
+    std::vector<unsigned int> indicesTexTri;
+    std::vector<unsigned int> indicesTexQuad;
+
+    std::vector<QVector2D> texCoords;
+    std::vector<QVector3D> normals;
+
+    readFile("../PathTracer/Malhas/teapot.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+    if(normals.size() == 0)
+    {
+        //normals = points;
+    }
+    TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
+    t->setMaterial(material);
+    _objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();

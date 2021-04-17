@@ -1,14 +1,14 @@
 #pragma once
+
 #include "object.h"
 #include <QOpenGLVertexArrayObject>
 
-
-class Plane : public Object
+class TriangleMesh : public Object
 {
 public:
-    Plane();
-    Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale);
-    void initialize() override;
+    TriangleMesh(std::vector<QVector3D> &points, std::vector<unsigned int> &indices, std::vector<QVector3D> &normals);
+
+    virtual void initialize() override;
 
     virtual void render(const QMatrix4x4 &projMatrix,
                         const QMatrix4x4 &viewMatrix, const QMatrix4x4 &modelMatrix, const std::vector<Light> &lights) override;
@@ -18,9 +18,8 @@ public:
     virtual void updateTexBuffer() override;
 
     void createVAO();
+
 private:
+
     QOpenGLVertexArrayObject _vao;
-
-    bool _isInitialized = false;
 };
-

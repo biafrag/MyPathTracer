@@ -125,8 +125,213 @@ bool RayTracing::triangleVerification(QVector3D p1, QVector3D p2, QVector3D p3, 
 
 
 
-QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatrix4x4 proj, Renderer::Camera cam,
-                                           std::vector<Object*> objects, Light light)
+bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int index,
+                                   std::vector<Object *> objects, QMatrix4x4 model)
+{
+    QVector3D p;
+    QVector3D d = (light.position - point);
+
+    std::vector<unsigned int> indices;
+    std::vector<QVector3D> vertices;
+    std::vector<QVector3D> normals;
+    for(unsigned int o = 0; o < objects.size(); o++)
+    {
+        if(o != index)
+        {
+            //Checar se raio atinge outro objeto sem ser esse
+            indices = objects[o]->getIndices();
+            vertices = objects[o]->getVertices(model);
+            normals = objects[o]->getNormals(model.transposed().inverted());
+
+            for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
+            {
+                int i1 = indices[i];
+                int i2 = indices[i+1];
+                int i3 = indices[i+2];
+
+                //Vetores formados pelos pontos do triângulo
+                QVector3D e2 = vertices[i3] - vertices[i2];
+                QVector3D e3 = vertices[i1] - vertices[i3];
+
+                //Normal ao triângulo
+                QVector3D normal = QVector3D::crossProduct(e2, e3).normalized();
+
+                //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
+                // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
+
+                float prodDN = QVector3D::dotProduct(d, normal);
+                if(prodDN != 0)
+                {
+                    //t é a coordenada paramétrica do ponto no raio
+                    float t = (QVector3D::dotProduct(vertices[i1] - point, normal))/prodDN;
+
+                    if(t > 0)
+                    {
+                        //p é o ponto que raio atinge na superfície
+                        QVector3D p = point + (t * d);
+
+                        //Verificar se ponto que raio atinge intersecta o triângulo
+                        bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
+
+                        if(verif)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    return false;
+}
+
+
+
+QColor RayTracing::reflection(std::vector<Light> lights, QVector3D point, QVector3D d, QVector3D n, unsigned int index, std::vector<Object *> objects, QMatrix4x4 model, QVector3D eye)
+{
+    float thetaRad = acos(QVector3D::dotProduct(d, n)/(d.length() * n.length()));
+
+    float theta = 180 * thetaRad/ M_PI;
+
+    QVector3D cross = QVector3D::crossProduct(d, n);
+    QMatrix4x4 rot;
+    rot.rotate(theta, cross);
+
+    QVector3D newDirection = rot * n;
+
+    std::vector<unsigned int> indices;
+    std::vector<QVector3D> vertices;
+    std::vector<QVector3D> normals;
+    float tCloser = FLT_MAX;
+    unsigned int vertCloser;
+    Object * objectCloser;
+    unsigned int indexObject;
+
+    for(unsigned int o; o < objects.size(); o++)
+    {
+        if(o != index)
+        {
+            //Checar se raio atinge outro objeto sem ser esse
+            indices = objects[o]->getIndices();
+            vertices = objects[o]->getVertices(model);
+            normals = objects[o]->getNormals(model.transposed().inverted());
+            for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
+            {
+                int i1 = indices[i];
+                int i2 = indices[i+1];
+                int i3 = indices[i+2];
+
+                //Vetores formados pelos pontos do triângulo
+                QVector3D e2 = vertices[i3] - vertices[i2];
+                QVector3D e3 = vertices[i1] - vertices[i3];
+
+                //Normal ao triângulo
+                QVector3D normal = QVector3D::crossProduct(e2, e3).normalized();
+
+                //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
+                // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
+
+                float prodDN = QVector3D::dotProduct(d, normal);
+                if(prodDN != 0)
+                {
+                    //t é a coordenada paramétrica do ponto no raio
+                    float t = (QVector3D::dotProduct(vertices[i1] - point, normal))/prodDN;
+
+                    if(t > 0)
+                    {
+                        //p é o ponto que raio atinge na superfície
+                        QVector3D p = point + (t * d);
+
+                        //Verificar se ponto que raio atinge intersecta o triângulo
+                        bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
+
+                        if(verif)
+                        {
+                            if(t < tCloser)
+                            {
+                                tCloser = t;
+                                vertCloser = i;
+                                objectCloser = objects[o];
+                                indexObject = o;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(tCloser < FLT_MAX)
+    {
+        indices = objectCloser->getIndices();
+        vertices = objectCloser->getVertices(model);
+        normals = objectCloser->getNormals(model.transposed().inverted());
+
+        unsigned int ind1, ind2, ind3;
+        ind1 = indices[vertCloser];
+        ind2 = indices[vertCloser + 1];
+        ind3 = indices[vertCloser + 2];
+
+        //Determinando ponto mais próximo
+        QVector3D point = eye + (tCloser * d);
+        QVector3D alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
+
+        //Phong
+
+        QColor corF = QColor(0, 0, 0);
+        Object::Material material = objectCloser->getMaterial();
+
+        for(auto light : lights)
+        {
+
+            //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
+            QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
+
+            QVector3D N = normalInt.normalized();
+            QVector3D L = (light.position - point).normalized();
+
+            float lambertian = QVector3D::dotProduct(L, N);
+            QVector3D specular(0, 0, 0);
+            QVector3D diffuse(0, 0, 0);
+            QVector3D ambient = light.ambient * material.color;
+            if(lambertian > 0)
+            {
+                diffuse = lambertian * light.diffuse * material.color; //Adicionar propriedade dos materiais do objeto depois
+                QVector3D V = (eye - point).normalized();
+                QVector3D H = (L+V).normalized();
+                float dotP = QVector3D::dotProduct(N,H);
+                float ispec;
+
+                if(dotP > 0)
+                {
+                    ispec = std::pow(dotP, light.shi);
+                }
+                else
+                {
+                    ispec = 0;
+                }
+                specular = light.specular * ispec;
+                alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
+
+            }
+            QVector3D aux = (diffuse + ambient + specular) * 255;
+
+            QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
+
+            corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+        }
+    }
+    return QColor(0,0,0);
+}
+
+
+
+
+
+
+QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 proj, Renderer::Camera cam,
+                                           std::vector<Object*> objects, std::vector<Light> lights)
 {
     QImage image(w, h, QImage::Format_RGB32);
 
@@ -150,12 +355,13 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
             //Lance um raio
 
             //d é um vetor que vai do olho até a tela
-            QVector3D d = (-cam.zNear * Ze) + (a*(((h-y)/(float)h) - 0.5) * Ye) + b * (((float)x/(float)w)-0.5)*Xe;
+            QVector3D d = (- cam.zNear * Ze) + (a*(((h-y)/(float)h) - 0.5) * Ye) + b * (((float)x/(float)w)-0.5)*Xe;
 
             //Variável que vai guardar qual é o menor t, ou seja, qual o ponto mais a frente que o raio atinge
             float tCloser = FLT_MAX;
             unsigned int vertCloser;
             Object * objectCloser;
+            unsigned int indexObject;
             std::vector<unsigned int> indices;
             std::vector<QVector3D> vertices;
             std::vector<QVector3D> normals;
@@ -199,6 +405,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                             tCloser = t;
                             vertCloser = i;
                             objectCloser = objects[o];
+                            indexObject = o;
 
                         }
                     }
@@ -228,40 +435,66 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
 
                 //Phong
 
-                //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
-                QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
-
-                QVector3D N = normalInt.normalized();
-                QVector3D L = (light.position - point).normalized();
-
-                float lambertian = QVector3D::dotProduct(L, N);
-                QVector3D specular(0, 0, 0);
-                QVector3D diffuse(0, 0, 0);
-                QVector3D ambient = light.ambient * objectCloser->getMaterial().color;
-                if(lambertian > 0)
+                QColor corF = QColor(0, 0, 0);
+                Object::Material material = objectCloser->getMaterial();
+                if(!material.isReflective)
                 {
-                    diffuse = lambertian * light.diffuse * objectCloser->getMaterial().color; //Adicionar propriedade dos materiais do objeto depois
-                    QVector3D V = (cam.eye - point).normalized();
-                    QVector3D H = (L+V).normalized();
-                    float dotP = QVector3D::dotProduct(N,H);
-                    float ispec;
 
-                    if(dotP > 0)
+                    for(auto light : lights)
                     {
-                        ispec = std::pow(dotP, light.shi);
-                    }
-                    else
-                    {
-                        ispec = 0;
-                    }
-                    specular = light.specular * ispec;
-                    alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
+                        //Checa se luz vai cotribuir para o ponto
 
+                            bool hasNoEffect = hasObjectObstacle(light, point, indexObject, objects, model);
+                            if(!hasNoEffect)
+                            {
+                                //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
+                                QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
+
+                                QVector3D N = normalInt.normalized();
+                                QVector3D L = (light.position - point).normalized();
+
+                                float lambertian = QVector3D::dotProduct(L, N);
+                                QVector3D specular(0, 0, 0);
+                                QVector3D diffuse(0, 0, 0);
+                                QVector3D ambient = light.ambient * material.color;
+                                if(lambertian > 0)
+                                {
+                                    diffuse = lambertian * light.diffuse * material.color; //Adicionar propriedade dos materiais do objeto depois
+                                    QVector3D V = (cam.eye - point).normalized();
+                                    QVector3D H = (L+V).normalized();
+                                    float dotP = QVector3D::dotProduct(N,H);
+                                    float ispec;
+
+                                    if(dotP > 0)
+                                    {
+                                        ispec = std::pow(dotP, light.shi);
+                                    }
+                                    else
+                                    {
+                                        ispec = 0;
+                                    }
+                                    specular = light.specular * ispec;
+                                    alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
+
+                                }
+                                QVector3D aux = (diffuse + ambient + specular) * 255;
+
+                                QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
+
+                                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+                            }
+                        }
                 }
-                QVector3D aux = (diffuse + ambient + specular) * 255;
+                else
+                {
+                        //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
+                        QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
 
-                QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
-                image.setPixelColor(x, y, cor);
+                        QVector3D N = normalInt.normalized();
+                        corF = reflection(lights, point, d, N, indexObject, objects, model, cam.eye);
+                }
+
+                image.setPixelColor(x, y, corF);
             }
             else
             {

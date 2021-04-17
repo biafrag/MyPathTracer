@@ -14,6 +14,8 @@ public:
         QVector3D albedo;
         QVector3D specular;
         QVector3D color;
+
+        bool isReflective;
     };
 
     Object();
@@ -33,6 +35,8 @@ public:
     std::vector <QVector3D> getVertices(QMatrix4x4 matrix = QMatrix4x4());
     std::vector <QVector3D> getNormals(QMatrix4x4 matrix = QMatrix4x4());
     Material getMaterial();
+
+    void setMaterial(Material material);
 
 protected:
 

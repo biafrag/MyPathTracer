@@ -38,12 +38,12 @@ public:
 
 //    };
 
-    struct Material
-    {
-        QVector3D albedo;
-        QVector3D specular;
-        QVector3D color;
-    };
+//    struct Material
+//    {
+//        QVector3D albedo;
+//        QVector3D specular;
+//        QVector3D color;
+//    };
 
     QImage getRayTracedImage();
 

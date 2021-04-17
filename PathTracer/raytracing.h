@@ -20,8 +20,8 @@ public:
         QVector3D normal;
     };
     RayTracing();
-    QImage generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatrix4x4 proj, Renderer::Camera cam,
-                                   std::vector<Object *> objects, Light light);
+    QImage generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 proj, Renderer::Camera cam,
+                                   std::vector<Object *> objects, std::vector<Light> lights);
 private:
 
     Ray CreateRay(QVector3D origin, QVector3D direction);
@@ -36,8 +36,10 @@ private:
     QVector3D getBaricentricCoordinates(QVector3D p1, QVector3D p2, QVector3D p3, QVector3D point);
     bool triangleVerification(QVector3D p1, QVector3D p2, QVector3D p3, QVector3D point);
 
-
+    bool hasObjectObstacle(Light light, QVector3D point, unsigned int index, std::vector<Object *> objects, QMatrix4x4 model);
     std::vector<QVector3D> _result;
+
+    QColor reflection(std::vector<Light> lights, QVector3D point, QVector3D d, QVector3D n, unsigned int index, std::vector<Object *> objects, QMatrix4x4 model, QVector3D eye);
 
 };
 

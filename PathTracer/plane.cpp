@@ -37,6 +37,39 @@ Plane::Plane()
 
 
 
+Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
+{
+    std::vector<QVector3D> points, normals;
+    std::vector<unsigned int> indices;
+    points = {{-1,1,0}, {1,1,0},
+               {-1,-1,0}, {1,-1,0}};
+
+    std::vector<QVector4D> points4D;
+
+    for(unsigned int i = 0; i < points.size(); i++)
+    {
+       //points4D.push_back(QVector4D(point.x(), point.y(), point.z(), 1));
+        points[i] = scale * points[i];
+
+        points[i] = rotation * points[i];
+        points[i] = translation * points[i];
+
+    }
+
+    indices = {0, 2, 1, 1, 2, 3};
+
+    normals = {{0, 0, 1}, {0, 0, 1},
+                {0, 0, 1}, {0, 0, 1}};
+
+    _points = points;
+    _indices = indices;
+    _normals = normals;
+
+    _material.color = QVector3D(0, 1, 0);
+}
+
+
+
 void Plane::initialize()
 {
     initializeOpenGLFunctions();

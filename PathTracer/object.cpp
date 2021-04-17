@@ -41,3 +41,10 @@ Object::Material Object::getMaterial()
 {
     return  _material;
 }
+
+
+
+void Object::setMaterial(Object::Material material)
+{
+    _material = material;
+}

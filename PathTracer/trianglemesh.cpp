@@ -1,80 +1,17 @@
-#include "sphere.h"
-#define M_PI 3.14159265358979323846
+#include "trianglemesh.h"
 
-int getIndex( int i, int j, int n )
+TriangleMesh::TriangleMesh(std::vector<QVector3D> &points,
+std::vector<unsigned int> &indices,
+std::vector<QVector3D> &normals)
 {
-    return j + i * ( n + 1 );
-}
-
-Sphere::Sphere()
-{
-    const int n = 30;
-    const int m = 30;
-
-    const int numTriangles = 2 * n * m;
-    const int numVertices = ( n + 1 ) * ( m + 1 );
-
-    std::vector<QVector3D> points;
-    for( unsigned int i = 0; i <= n; i++ )
-    {
-        for( unsigned int j = 0; j <= m; j++ )
-        {
-            //Atualizar as coordenadas de textura
-            float s = (float) i / n;
-            float t = (float) j / m;
-            //texCoords.push_back(glm::vec2(s,t));
-
-            //Calcula os parâmetros
-            double theta = 2 * s * M_PI;
-            double phi = t * M_PI;
-            double sinTheta = sin( theta );
-            double cosTheta = cos( theta );
-            double sinPhi = sin( phi );
-            double cosPhi = cos( phi );
-
-            //Calcula os vértices == equacao da esfera
-            points.push_back( QVector3D(cosTheta * sinPhi,
-                                          cosPhi,
-                                          sinTheta * sinPhi) );
-        }
-    }
-
-    std::vector<unsigned int> indicesS;
-    indicesS.resize(numTriangles*3);
-
-    unsigned int startIndex = _points.size();
     _points = points;
-
-    std::vector<QVector3D> normals;
-    normals = points;
-
+    _indices = indices;
     _normals = normals;
-
-    //Preenche o vetor com a triangulação
-    unsigned int k = 0;
-    for( unsigned int i = 0; i < n; i++ )
-    {
-        for( unsigned int j = 0; j < m; j++ )
-        {
-            indicesS[ k++ ] = getIndex( i + 1, j, n ) + startIndex;
-            indicesS[ k++ ] = getIndex( i + 1, j + 1, n ) + startIndex;
-            indicesS[ k++ ] = getIndex( i, j, n ) + startIndex;
-
-
-            indicesS[ k++ ] = getIndex( i + 1, j + 1, n ) + startIndex;
-            indicesS[ k++ ] = getIndex( i, j + 1, n ) + startIndex;
-            indicesS[ k++ ] = getIndex( i, j, n ) + startIndex;
-        }
-    }
-
-    _indices = indicesS;
-
-    _material.color = QVector3D(1, 0, 0);
 }
 
 
 
-void Sphere::initialize()
+void TriangleMesh::initialize()
 {
     initializeOpenGLFunctions();
 
@@ -111,8 +48,7 @@ template<class T> void setUniformArrayValue(QOpenGLShaderProgram *program,
     program->setUniformValue(name, value);
 }
 
-
-void Sphere::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, const QMatrix4x4 &modelMatrix, const std::vector<Light> &lights)
+void TriangleMesh::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, const QMatrix4x4 &modelMatrix, const std::vector<Light> &lights)
 {
     _program->bind();
     _vao.bind();
@@ -151,7 +87,7 @@ void Sphere::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, 
 
 
 
-void Sphere::createBuffers()
+void TriangleMesh::createBuffers()
 {
     glGenBuffers(1, &_pointsBuffer);
     glGenBuffers(1, &_normalsBuffer);
@@ -164,7 +100,7 @@ void Sphere::createBuffers()
 
 
 
-void Sphere::updateVertexBuffer()
+void TriangleMesh::updateVertexBuffer()
 {
     //Transfer new data to buffer.
     int size = static_cast<int>(_points.size());
@@ -185,7 +121,7 @@ void Sphere::updateVertexBuffer()
 
 
 
-void Sphere::updateTexBuffer()
+void TriangleMesh::updateTexBuffer()
 {
     int size = static_cast<int>(_texCoords.size());
     int numberOfBytes = size * static_cast<int>(sizeof(float));
@@ -196,7 +132,7 @@ void Sphere::updateTexBuffer()
 
 
 
-void Sphere::createVAO()
+void TriangleMesh::createVAO()
 {
     _vao.create();
     _vao.bind();

@@ -22,7 +22,8 @@ SOURCES += \
     plane.cpp \
     raytracing.cpp \
     renderer.cpp \
-    sphere.cpp
+    sphere.cpp \
+    trianglemesh.cpp
 
 HEADERS += \
     light.h \
@@ -30,8 +31,10 @@ HEADERS += \
     object.h \
     plane.h \
     raytracing.h \
+    readerOBJ.h \
     renderer.h \
-    sphere.h
+    sphere.h \
+    trianglemesh.h
 
 FORMS += \
     mainwindow.ui
