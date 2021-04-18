@@ -4,9 +4,19 @@
 #include "renderer.h"
 #define M_PI 3.1415
 
-RayTracing::RayTracing()
-{
+RayTracing::RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
+                       std::vector<Object *> objects, std::vector<Light> lights)
 
+    : _model(model),
+      _camera(cam),
+      _objects(objects),
+      _lights(lights),
+      _width(w),
+      _height(h)
+{
+    _Ze = (_camera.eye - cam.center).normalized();
+    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
+    _Ye = QVector3D::crossProduct(_Ze, _Xe);
 }
 
 
@@ -125,23 +135,23 @@ bool RayTracing::triangleVerification(QVector3D p1, QVector3D p2, QVector3D p3, 
 
 
 
-bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int index,
-                                   std::vector<Object *> objects, QMatrix4x4 model)
+bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int index)
 {
-    QVector3D p;
-    QVector3D d = (light.position - point).normalized();
+    Ray pointLightRay;
+    pointLightRay.origin = point;
+    pointLightRay.direction = (light.position - point).normalized();
 
     std::vector<unsigned int> indices;
     std::vector<QVector3D> vertices;
     std::vector<QVector3D> normals;
-    for(unsigned int o = 0; o < objects.size(); o++)
+    for(unsigned int o = 0; o < _objects.size(); o++)
     {
         if(o != index)
         {
             //Checar se raio atinge outro objeto sem ser esse
-            indices = objects[o]->getIndices();
-            vertices = objects[o]->getVertices(model);
-            normals = objects[o]->getNormals(model.transposed().inverted());
+            indices = _objects[o]->getIndices();
+            vertices = _objects[o]->getVertices(_model);
+            normals = _objects[o]->getNormals(_model.transposed().inverted());
 
             for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
             {
@@ -159,7 +169,7 @@ bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int in
                 //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
                 // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
 
-                float prodDN = QVector3D::dotProduct(d, normal);
+                float prodDN = QVector3D::dotProduct(pointLightRay.direction, normal);
                 if(prodDN != 0)
                 {
                     //t é a coordenada paramétrica do ponto no raio
@@ -168,7 +178,7 @@ bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int in
                     if(t > 0)
                     {
                         //p é o ponto que raio atinge na superfície
-                        QVector3D p = point + (t * d);
+                        QVector3D p = getRayPoint(t, pointLightRay);
 
                         //Verificar se ponto que raio atinge intersecta o triângulo
                         bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
@@ -327,35 +337,39 @@ QColor RayTracing::reflection(std::vector<Light> lights, QVector3D point, QVecto
 
 
 
-
-
-
-QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatrix4x4 view, QMatrix4x4 proj, Renderer::Camera cam,
-                                           std::vector<Object*> objects, std::vector<Light> lights)
+QVector3D RayTracing::getRayPoint(float t, RayTracing::Ray ray)
 {
-    QImage image(w, h, QImage::Format_RGB32);
+    return ray.origin + (t * ray.direction);
+}
 
-    QVector3D Xe, Ye, Ze;
 
-    Ze = (cam.eye - cam.center).normalized();
-    Xe = QVector3D::crossProduct(cam.up, Ze).normalized();
-    Ye = QVector3D::crossProduct(Ze, Xe);
+
+
+
+
+QImage RayTracing::generateRayTracingImage()
+{
+    QImage image(_width, _height, QImage::Format_RGB32);
 
     //a é a altura real
-    float a = 2 * cam.zNear * tan(cam.fov* (M_PI/180)/2.0);
+    float a = 2 * _camera.zNear * tan(_camera.fov* (M_PI/180)/2.0);
 
     //b é a largura real
-    float b = (a * w)/h;
+    float b = (a * _width)/_height;
 
     #pragma omp parallel for
-    for(int y = 0; y < h; y++)
+    for(int y = 0; y < _height; y++)
     {
-        for(int x=0; x < w; x++)
+        for(int x=0; x < _width; x++)
         {
             //Lance um raio
+             Ray cameraPixelRay;
+             cameraPixelRay.origin = _camera.eye;
 
-            //d é um vetor que vai do olho até a tela
-            QVector3D d = (- cam.zNear * Ze) + (a*(((h-y)/(float)h) - 0.5) * Ye) + b * (((float)x/(float)w)-0.5)*Xe;
+             //d é um vetor que vai do olho até a tela
+            QVector3D d = (- _camera.zNear * _Ze) + (a*(((_height-y)/(float)_height) - 0.5) * _Ye) + b * (((float)x/(float)_width)-0.5) * _Xe;
+
+            cameraPixelRay.direction = d;
 
             //Variável que vai guardar qual é o menor t, ou seja, qual o ponto mais a frente que o raio atinge
             float tCloser = FLT_MAX;
@@ -365,11 +379,11 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
             std::vector<unsigned int> indices;
             std::vector<QVector3D> vertices;
             std::vector<QVector3D> normals;
-            for(unsigned int o = 0; o < objects.size(); o++)
+            for(unsigned int o = 0; o < _objects.size(); o++)
             {
-                indices = objects[o]->getIndices();
-                vertices = objects[o]->getVertices(model);
-                normals = objects[o]->getNormals(model.transposed().inverted());
+                indices = _objects[o]->getIndices();
+                vertices = _objects[o]->getVertices(_model);
+                normals = _objects[o]->getNormals(_model.transposed().inverted());
 
                 for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
                 {
@@ -378,7 +392,6 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                     int i3 = indices[i+2];
 
                     //Vetores formados pelos pontos do triângulo
-                    QVector3D e1 = vertices[i2] - vertices[i1];
                     QVector3D e2 = vertices[i3] - vertices[i2];
                     QVector3D e3 = vertices[i1] - vertices[i3];
 
@@ -392,10 +405,10 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                     if(prodDN != 0)
                     {
                         //t é a coordenada paramétrica do ponto no raio
-                        float t = (QVector3D::dotProduct(vertices[i1] - cam.eye, normal))/prodDN;
+                        float t = (QVector3D::dotProduct(vertices[i1] - _camera.eye, normal))/prodDN;
 
                         //p é o ponto que raio atinge na superfície
-                        QVector3D p = cam.eye + (t * d);
+                        QVector3D p = getRayPoint(t, cameraPixelRay);
 
                         //Verificar se ponto que raio atinge intersecta o triângulo
                         bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
@@ -404,7 +417,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                         {
                             tCloser = t;
                             vertCloser = i;
-                            objectCloser = objects[o];
+                            objectCloser = _objects[o];
                             indexObject = o;
 
                         }
@@ -421,8 +434,8 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
             if(tCloser < FLT_MAX)
             {
                 indices = objectCloser->getIndices();
-                vertices = objectCloser->getVertices(model);
-                normals = objectCloser->getNormals(model.transposed().inverted());
+                vertices = objectCloser->getVertices(_model);
+                normals = objectCloser->getNormals(_model.transposed().inverted());
 
                 unsigned int ind1, ind2, ind3;
                 ind1 = indices[vertCloser];
@@ -430,7 +443,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                 ind3 = indices[vertCloser + 2];
 
                 //Determinando ponto mais próximo
-                QVector3D point = cam.eye + (tCloser * d);
+                QVector3D point = getRayPoint(tCloser, cameraPixelRay);
                 QVector3D alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
 
                 //Phong
@@ -440,12 +453,12 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                 if(!material.isReflective)
                 {
 
-                    for(auto light : lights)
+                    for(auto light : _lights)
                     {
                         //Checa se luz vai cotribuir para o ponto
                             QVector3D ambient = light.ambient * material.color;
 
-                            bool hasNoEffect = hasObjectObstacle(light, point, indexObject, objects, model);
+                            bool hasNoEffect = hasObjectObstacle(light, point, indexObject);
                             if(!hasNoEffect)
                             {
                                 //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
@@ -460,7 +473,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                                 if(lambertian > 0)
                                 {
                                     diffuse = lambertian * light.diffuse * material.color; //Adicionar propriedade dos materiais do objeto depois
-                                    QVector3D V = (cam.eye - point).normalized();
+                                    QVector3D V = (_camera.eye - point).normalized();
                                     QVector3D H = (L+V).normalized();
                                     float dotP = QVector3D::dotProduct(N,H);
                                     float ispec;
@@ -498,7 +511,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                         QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
 
                         QVector3D N = normalInt.normalized();
-                        corF = reflection(lights, point, d, N, indexObject, objects, model, cam.eye);
+                        corF = reflection(_lights, point, d, N, indexObject, _objects, _model, _camera.eye);
                 }
 
                 image.setPixelColor(x, y, corF);

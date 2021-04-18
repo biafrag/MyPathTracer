@@ -17,7 +17,7 @@ Renderer::Renderer(QWidget *parent)
     _camera.zFar  = 100.f;
     _camera.fov  = 60.f;
 
-    _light.position = {-50, 50, 10};
+    _light.position = {0, 50, 40};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {1.0f,  1.0f, 1.0f};
@@ -41,13 +41,13 @@ Renderer::Renderer(QWidget *parent)
 
 QImage Renderer::getRayTracedImage()
 {
-    RayTracing r;
+    RayTracing r(width(), height(), _model,  _camera, _objects, _lights);
 
     //Levando vértices e normais pro espaço do modelo
     std::vector<QVector3D> vertices;
     std::vector<QVector3D> normals;
 
-    return r.generateRayTracingImage(width(), height(), _model, _view, _proj, _camera, _objects, _lights);
+    return r.generateRayTracingImage();
 
 }
 
@@ -228,12 +228,17 @@ void Renderer::initializeGL()
     Plane *p =  new Plane(trans, rot, scale);
     Object::Material material;
     material.color = QVector3D(1, 1, 0);
+    //material.isReflective = true;
     p->setMaterial(material);
     _objects.push_back(p);
+    material.color = QVector3D(1, 0, 0);
+    //material.isReflective = true;
 
     Sphere *s =  new Sphere();
-    _objects.push_back(s);
+    s->setMaterial(material);
+    //_objects.push_back(s);
 
+    material.isReflective = false;
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
     trans.setToIdentity();
@@ -278,7 +283,7 @@ void Renderer::initializeGL()
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
     t->setMaterial(material);
-    //_objects.push_back(t);
+    _objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();
