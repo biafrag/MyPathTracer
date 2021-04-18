@@ -129,7 +129,7 @@ bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int in
                                    std::vector<Object *> objects, QMatrix4x4 model)
 {
     QVector3D p;
-    QVector3D d = (light.position - point);
+    QVector3D d = (light.position - point).normalized();
 
     std::vector<unsigned int> indices;
     std::vector<QVector3D> vertices;
@@ -322,7 +322,7 @@ QColor RayTracing::reflection(std::vector<Light> lights, QVector3D point, QVecto
             corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
         }
     }
-    return QColor(0,0,0);
+    return QColor(20,20,20);
 }
 
 
@@ -443,6 +443,7 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                     for(auto light : lights)
                     {
                         //Checa se luz vai cotribuir para o ponto
+                            QVector3D ambient = light.ambient * material.color;
 
                             bool hasNoEffect = hasObjectObstacle(light, point, indexObject, objects, model);
                             if(!hasNoEffect)
@@ -456,7 +457,6 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                                 float lambertian = QVector3D::dotProduct(L, N);
                                 QVector3D specular(0, 0, 0);
                                 QVector3D diffuse(0, 0, 0);
-                                QVector3D ambient = light.ambient * material.color;
                                 if(lambertian > 0)
                                 {
                                     diffuse = lambertian * light.diffuse * material.color; //Adicionar propriedade dos materiais do objeto depois
@@ -479,6 +479,13 @@ QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 model, QMatr
                                 }
                                 QVector3D aux = (diffuse + ambient + specular) * 255;
 
+                                QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
+
+                                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+                            }
+                            else
+                            {
+                                QVector3D aux = ambient * 255;
                                 QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
 
                                 corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));

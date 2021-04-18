@@ -11,24 +11,24 @@ Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
     _camera.center = QVector3D(0.f,0.f,0.f);
-    _camera.eye =  QVector3D(0.f,0.f,50.f);
+    _camera.eye =  QVector3D(0.f,0.f,5.f);
     _camera.up = QVector3D(0.f,2.f,0.f);
     _camera.zNear = 0.1f;
     _camera.zFar  = 100.f;
     _camera.fov  = 60.f;
 
-    _light.position = {0, 50, 0};
+    _light.position = {-50, 50, 10};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
-    _light.specular = {1.0f,  1.0f,1.0f};
-    _light.shi = 24.0f;
+    _light.specular = {1.0f,  1.0f, 1.0f};
+    _light.shi = 32.0f;
 
     Light light2;
     light2.position = {5, -5, 5};
     light2.ambient = {0.3f, 0.3f, 0.3f};
     light2.diffuse = {1.0f, 1.0f, 1.0f};
     light2.specular = {1.0f,  1.0f,1.0f};
-    light2.shi = 24.0f;
+    light2.shi = 0.3f;
 
     _lights.push_back(_light);
 
@@ -222,9 +222,9 @@ void Renderer::initializeGL()
     makeCurrent();
 
     QMatrix4x4 rot, trans, scale;
-    scale.scale(QVector3D(4, 4, 4));
+    scale.scale(QVector3D(100, 100, 100));
     rot.rotate(90, QVector3D(1, 0 , 0));
-    trans.translate(QVector3D(0, -2, 0));
+    trans.translate(QVector3D(0, -1, 0));
     Plane *p =  new Plane(trans, rot, scale);
     Object::Material material;
     material.color = QVector3D(1, 1, 0);
@@ -232,7 +232,7 @@ void Renderer::initializeGL()
     _objects.push_back(p);
 
     Sphere *s =  new Sphere();
-    //_objects.push_back(s);
+    _objects.push_back(s);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -278,7 +278,7 @@ void Renderer::initializeGL()
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
     t->setMaterial(material);
-    _objects.push_back(t);
+    //_objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();
