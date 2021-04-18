@@ -5,6 +5,8 @@
 #include <QObject>
 #include <QOpenGLExtraFunctions>
 #include "light.h"
+#include "ray.h"
+#include "ObjectType.h"
 
 class Object : public QObject, protected QOpenGLExtraFunctions
 {
@@ -38,6 +40,9 @@ public:
 
     void setMaterial(Material material);
 
+    ObjectType getObjectType();
+
+
 protected:
 
     /**
@@ -57,4 +62,6 @@ protected:
     std::vector<unsigned int> _indices;
     std::vector<QVector3D> _normals;
     std::vector<QVector3D> _texCoords;
+
+    ObjectType _type;
 };

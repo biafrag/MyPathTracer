@@ -5,7 +5,7 @@
 class Sphere : public Object
 {
 public:
-    Sphere();
+    Sphere(QVector3D center = QVector3D(0, 0, 0), float radius = 1.0);
     virtual void initialize() override;
 
     virtual void render(const QMatrix4x4 &projMatrix,
@@ -15,10 +15,17 @@ public:
     virtual void updateVertexBuffer() override;
     virtual void updateTexBuffer() override;
 
+    bool intersectsWith(Ray ray, QVector3D &normal, float &t);
+
+    QVector3D normalAt(QVector3D point);
     void createVAO();
 
 private:
 
     QOpenGLVertexArrayObject _vao;
+
+    QVector3D _center;
+
+    float _radius;
 };
 

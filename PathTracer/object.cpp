@@ -48,3 +48,10 @@ void Object::setMaterial(Object::Material material)
 {
     _material = material;
 }
+
+
+
+ObjectType Object::getObjectType()
+{
+    return _type;
+}

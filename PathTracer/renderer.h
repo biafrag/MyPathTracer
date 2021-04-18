@@ -45,7 +45,7 @@ public:
 //        QVector3D color;
 //    };
 
-    QImage getRayTracedImage();
+    QImage getRayTracedImage(float &time);
 
 private:
     void createScene();

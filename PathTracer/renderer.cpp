@@ -17,7 +17,7 @@ Renderer::Renderer(QWidget *parent)
     _camera.zFar  = 100.f;
     _camera.fov  = 60.f;
 
-    _light.position = {0, 50, 40};
+    _light.position = {-50, 50, 50};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {1.0f,  1.0f, 1.0f};
@@ -39,14 +39,16 @@ Renderer::Renderer(QWidget *parent)
 
 
 
-QImage Renderer::getRayTracedImage()
+QImage Renderer::getRayTracedImage(float &time)
 {
     RayTracing r(width(), height(), _model,  _camera, _objects, _lights);
 
     //Levando vértices e normais pro espaço do modelo
     std::vector<QVector3D> vertices;
     std::vector<QVector3D> normals;
+    QImage image = r.generateRayTracingImage();
 
+    time = r.getTime();
     return r.generateRayTracingImage();
 
 }
@@ -236,28 +238,30 @@ void Renderer::initializeGL()
 
     Sphere *s =  new Sphere();
     s->setMaterial(material);
-    //_objects.push_back(s);
+    _objects.push_back(s);
 
     material.isReflective = false;
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
     trans.setToIdentity();
-    trans.translate(QVector3D(2, -1, 0));
+    trans.translate(QVector3D(1, -1, 0));
     scale.setToIdentity();
-    scale.scale(QVector3D(2, 2, 1));
+    scale.scale(QVector3D(30, 30, 30));
 
 
     Plane *p2 =  new Plane(trans, rot, scale);
     material.color = QVector3D(1,0.5,0.1);
+    material.isReflective = true;
+
     p2->setMaterial(material);
-   // _objects.push_back(p2);
+    _objects.push_back(p2);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 0 , 1));
     trans.setToIdentity();
     trans.translate(QVector3D(0, -1, -3));
     scale.setToIdentity();
-    scale.scale(QVector3D(2, 2, 1));
+    scale.scale(QVector3D(30, 30, 30));
 
     Plane *p3 =  new Plane(trans, rot, scale);
     material.color = QVector3D(0.4,0.8,0.5);
@@ -283,7 +287,7 @@ void Renderer::initializeGL()
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
     t->setMaterial(material);
-    _objects.push_back(t);
+    //_objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();

@@ -4,6 +4,7 @@ TriangleMesh::TriangleMesh(std::vector<QVector3D> &points,
 std::vector<unsigned int> &indices,
 std::vector<QVector3D> &normals)
 {
+    _type = ObjectType::MESH;
     _points = points;
     _indices = indices;
     _normals = normals;

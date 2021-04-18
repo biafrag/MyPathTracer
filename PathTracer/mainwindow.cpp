@@ -18,7 +18,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    QImage image = ui->openGLWidget->getRayTracedImage();
+    float time;
+    QImage image = ui->openGLWidget->getRayTracedImage(time);
 
     ui->label->setPixmap(QPixmap::fromImage(image));
+    //ui->label_2->setText("Tempo de renderizazao: " + QString::number(time) + " s");
 }

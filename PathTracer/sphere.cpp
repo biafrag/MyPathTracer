@@ -6,8 +6,12 @@ int getIndex( int i, int j, int n )
     return j + i * ( n + 1 );
 }
 
-Sphere::Sphere()
+Sphere::Sphere(QVector3D center, float radius)
+    :_center(center),
+     _radius(radius)
 {
+    _type = ObjectType::SPHERE;
+
     const int n = 30;
     const int m = 30;
 
@@ -15,6 +19,7 @@ Sphere::Sphere()
     const int numVertices = ( n + 1 ) * ( m + 1 );
 
     std::vector<QVector3D> points;
+
     for( unsigned int i = 0; i <= n; i++ )
     {
         for( unsigned int j = 0; j <= m; j++ )
@@ -33,9 +38,9 @@ Sphere::Sphere()
             double cosPhi = cos( phi );
 
             //Calcula os vértices == equacao da esfera
-            points.push_back( QVector3D(cosTheta * sinPhi,
+            points.push_back( _radius * QVector3D(cosTheta * sinPhi,
                                           cosPhi,
-                                          sinTheta * sinPhi) );
+                                          sinTheta * sinPhi) + _center);
         }
     }
 
@@ -192,6 +197,43 @@ void Sphere::updateTexBuffer()
 
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, numberOfBytes, _texCoords.data(), GL_STATIC_DRAW);
+}
+
+
+
+bool Sphere::intersectsWith(Ray ray, QVector3D &normal, float &t)
+{
+    // Calculate distance along the ray where the sphere is intersected
+    QVector3D d = _center - ray.origin;
+    float p1 = QVector3D::dotProduct(ray.direction, d);
+    float p2sqr = p1 * p1 - QVector3D::dotProduct(d, d) + _radius * _radius;
+    if (p2sqr < 0)
+    {
+        return false;
+    }
+    float p2 = sqrt(p2sqr);
+    t = p1 - p2 > 0 ? p1 - p2 : p1 + p2;
+    float distance = FLT_MAX;
+
+    QVector3D position;
+
+    if (t > 0 && t < distance)
+    {
+        distance = t;
+        position = ray.origin + t * ray.direction;
+        normal = (position - _center).normalized();
+
+        return true;
+    }
+    return false;
+
+}
+
+
+
+QVector3D Sphere::normalAt(QVector3D point)
+{
+    return (point - _center).normalized();
 }
 
 

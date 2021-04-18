@@ -26,10 +26,12 @@ SOURCES += \
     trianglemesh.cpp
 
 HEADERS += \
+    ObjectType.h \
     light.h \
     mainwindow.h \
     object.h \
     plane.h \
+    ray.h \
     raytracing.h \
     readerOBJ.h \
     renderer.h \

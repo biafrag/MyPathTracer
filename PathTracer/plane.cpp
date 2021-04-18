@@ -1,8 +1,9 @@
 #include "plane.h"
 
 Plane::Plane()
-    :Object()
 {
+    _type = ObjectType::PLANE;
+
     std::vector<QVector3D> points, normals;
     std::vector<unsigned int> indices;
     points = {{-1,1,0}, {1,1,0},
@@ -39,6 +40,7 @@ Plane::Plane()
 
 Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 {
+    _type = ObjectType::PLANE;
     std::vector<QVector3D> points, normals;
     std::vector<unsigned int> indices;
     points = {{-1,1,0}, {1,1,0},
