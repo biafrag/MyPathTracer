@@ -366,8 +366,8 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
                 Ray reflection_ray ;
                 reflection_ray.energy = ray.energy - 1;
                 reflection_ray.origin = point;
-                //reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
-                reflection_ray.direction = reflection_direction;
+                reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
+                //reflection_ray.direction = reflection_direction;
 
                 float tRef;
                 Object * objRef;
@@ -378,7 +378,7 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
                 if(objRef != nullptr)
                 {
                     QColor cor = getColorAt(reflection_intersection_position, reflection_ray, tRef, objRef, indObjRef, indVertRef) ;
-                    corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+                    corF = QColor(std::fmin(corF.red() + cor.red()*0.3, 255), std::fmin(corF.green() + cor.green()*0.3, 255), std::fmin(corF.blue() + cor.blue()*0.3, 255));
                 }
             }
             bool hasNoEffect = hasObjectObstacle(light, point, indObj);
@@ -408,11 +408,19 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
                     }
                     specular = light.specular * ispec;
 
+//                    if(material.isReflective)
+//                    {
+//                        specular = 0*specular;
+//                    }
                 }
                 QVector3D aux = (diffuse + specular) * 255;
 
                 QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
 
+                if(material.isReflective)
+                {
+                    cor = QColor(0, 0, 0);
+                }
                 corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
             }
         }
@@ -435,7 +443,7 @@ QImage RayTracing::generateRayTracingImage()
     //b é a largura real
     float b = (a * _width)/_height;
 
-    unsigned int aadepth = 1;
+    unsigned int aadepth = 5;
 
     //Passada do JFA
     auto start  = std::chrono::high_resolution_clock::now();

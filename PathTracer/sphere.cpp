@@ -228,7 +228,7 @@ float Sphere::intersectsWith(Ray ray, QMatrix4x4 model)
 //    return false;
 
     _model = model;
-    QVector3D center = /*model **/ _center;
+    QVector3D center = model * _center;
     QVector3D oc = ray.origin - _center;
     float a = QVector3D::dotProduct(ray.direction, ray.direction);
     float b = 2 * QVector3D::dotProduct(ray.direction, ray.origin - center);
@@ -253,7 +253,7 @@ float Sphere::intersectsWith(Ray ray, QMatrix4x4 model)
 
 QVector3D Sphere::normalAt(QVector3D point)
 {
-    return (point - /*_model **/_center).normalized();
+    return (point - _model *_center).normalized();
 }
 
 

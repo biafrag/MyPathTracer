@@ -22,7 +22,7 @@ in vec3 fragPos;
 in vec3 fragNormal;
 in vec2 fragUV;
 
-const int NR_LIGHTS = 1;
+const int NR_LIGHTS = 2;
 
 uniform Light lights[NR_LIGHTS]; //Vetor de luzes na posição do olho
 

@@ -23,16 +23,16 @@ Renderer::Renderer(QWidget *parent)
     _light.specular = {1.0f,  1.0f, 1.0f};
     _light.shi = 32.0f;
 
-//    Light light2;
-//    light2.position = {5, -5, 5};
-//    light2.ambient = {0.3f, 0.3f, 0.3f};
-//    light2.diffuse = {1.0f, 1.0f, 1.0f};
-//    light2.specular = {1.0f,  1.0f,1.0f};
-//    light2.shi = 0.3f;
+    Light light2;
+    light2.position = {50, 50, 50};
+    light2.ambient = {0.3f, 0.3f, 0.3f};
+    light2.diffuse = {1.0f, 1.0f, 1.0f};
+    light2.specular = {1.0f,  1.0f,1.0f};
+    light2.shi = 32.0f;
 
     _lights.push_back(_light);
 
-    //_lights.push_back(light2);
+    _lights.push_back(light2);
 
 
 }
@@ -233,19 +233,19 @@ void Renderer::initializeGL()
     //material.isReflective = true;
     p->setMaterial(material);
     _objects.push_back(p);
-    material.color = QVector3D(1, 0, 0);
-    material.isReflective = true;
+    material.color = QVector3D(1, 1, 1);
+    material.isReflective = false;
 
     Sphere *s =  new Sphere();
     s->setMaterial(material);
     _objects.push_back(s);
 
     material.isReflective = false;
-    material.color = QVector3D(1, 0.4, 0.1);
+    material.color = QVector3D(1, 0, 0);
 
-//    Sphere *s2 =  new Sphere();
-//    s->setMaterial(material);
-//    _objects.push_back(s2);
+    Sphere *s2 =  new Sphere(QVector3D(-3, 0, 0), 0.5);
+    s2->setMaterial(material);
+    _objects.push_back(s2);
 
     material.isReflective = false;
     rot.setToIdentity();
@@ -258,7 +258,7 @@ void Renderer::initializeGL()
 
     Plane *p2 =  new Plane(trans, rot, scale);
     material.color = QVector3D(1,0.5,0.1);
-    //material.isReflective = true;
+    material.isReflective = false;
 
     p2->setMaterial(material);
     _objects.push_back(p2);
@@ -272,7 +272,7 @@ void Renderer::initializeGL()
 
     Plane *p3 =  new Plane(trans, rot, scale);
     material.color = QVector3D(0.4,0.8,0.5);
-    //material.isReflective = true;
+    material.isReflective = true;
     p3->setMaterial(material);
     _objects.push_back(p3);
 
