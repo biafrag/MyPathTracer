@@ -41,7 +41,7 @@ private:
     bool hasObjectObstacle(Light light, QVector3D point, unsigned int index);
     std::vector<QVector3D> _result;
 
-    QColor reflection(std::vector<Light> lights, QVector3D point, QVector3D d, QVector3D n, unsigned int index, std::vector<Object *> objects, QMatrix4x4 model, QVector3D eye);
+    Object * reflection(Ray ray, float &tCloser, unsigned int &indexObject, unsigned int &vertCloser, unsigned int indMyObject);
 
     QVector3D getRayPoint(float t, Ray ray);
 

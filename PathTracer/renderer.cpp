@@ -21,7 +21,7 @@ Renderer::Renderer(QWidget *parent)
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {1.0f,  1.0f, 1.0f};
-    _light.shi = 100.0f;
+    _light.shi = 32.0f;
 
 //    Light light2;
 //    light2.position = {5, -5, 5};
@@ -234,11 +234,18 @@ void Renderer::initializeGL()
     p->setMaterial(material);
     _objects.push_back(p);
     material.color = QVector3D(1, 0, 0);
-    //material.isReflective = true;
+    material.isReflective = true;
 
     Sphere *s =  new Sphere();
     s->setMaterial(material);
     _objects.push_back(s);
+
+    material.isReflective = false;
+    material.color = QVector3D(1, 0.4, 0.1);
+
+//    Sphere *s2 =  new Sphere();
+//    s->setMaterial(material);
+//    _objects.push_back(s2);
 
     material.isReflective = false;
     rot.setToIdentity();
@@ -251,7 +258,7 @@ void Renderer::initializeGL()
 
     Plane *p2 =  new Plane(trans, rot, scale);
     material.color = QVector3D(1,0.5,0.1);
-    material.isReflective = true;
+    //material.isReflective = true;
 
     p2->setMaterial(material);
     _objects.push_back(p2);
@@ -267,7 +274,7 @@ void Renderer::initializeGL()
     material.color = QVector3D(0.4,0.8,0.5);
     //material.isReflective = true;
     p3->setMaterial(material);
-    //_objects.push_back(p3);
+    _objects.push_back(p3);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;

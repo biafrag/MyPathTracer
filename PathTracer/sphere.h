@@ -27,5 +27,7 @@ private:
     QVector3D _center;
 
     float _radius;
+
+    QMatrix4x4 _model;
 };
 
