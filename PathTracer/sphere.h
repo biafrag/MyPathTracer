@@ -15,7 +15,7 @@ public:
     virtual void updateVertexBuffer() override;
     virtual void updateTexBuffer() override;
 
-    bool intersectsWith(Ray ray, QVector3D &normal, float &t);
+    float intersectsWith(Ray ray, QMatrix4x4 model);
 
     QVector3D normalAt(QVector3D point);
     void createVAO();

@@ -21,14 +21,14 @@ Renderer::Renderer(QWidget *parent)
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {1.0f,  1.0f, 1.0f};
-    _light.shi = 32.0f;
+    _light.shi = 100.0f;
 
-    Light light2;
-    light2.position = {5, -5, 5};
-    light2.ambient = {0.3f, 0.3f, 0.3f};
-    light2.diffuse = {1.0f, 1.0f, 1.0f};
-    light2.specular = {1.0f,  1.0f,1.0f};
-    light2.shi = 0.3f;
+//    Light light2;
+//    light2.position = {5, -5, 5};
+//    light2.ambient = {0.3f, 0.3f, 0.3f};
+//    light2.diffuse = {1.0f, 1.0f, 1.0f};
+//    light2.specular = {1.0f,  1.0f,1.0f};
+//    light2.shi = 0.3f;
 
     _lights.push_back(_light);
 

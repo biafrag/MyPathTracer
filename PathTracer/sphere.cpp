@@ -201,32 +201,51 @@ void Sphere::updateTexBuffer()
 
 
 
-bool Sphere::intersectsWith(Ray ray, QVector3D &normal, float &t)
+float Sphere::intersectsWith(Ray ray, QMatrix4x4 model)
 {
-    // Calculate distance along the ray where the sphere is intersected
-    QVector3D d = _center - ray.origin;
-    float p1 = QVector3D::dotProduct(ray.direction, d);
-    float p2sqr = p1 * p1 - QVector3D::dotProduct(d, d) + _radius * _radius;
-    if (p2sqr < 0)
+//    // Calculate distance along the ray where the sphere is intersected
+//    QVector3D d = _center - ray.origin;
+//    float p1 = QVector3D::dotProduct(ray.direction, d);
+//    float p2sqr = p1 * p1 - QVector3D::dotProduct(d, d) + _radius * _radius;
+//    if (p2sqr < 0)
+//    {
+//        return false;
+//    }
+//    float p2 = sqrt(p2sqr);
+//    t = p1 - p2 > 0 ? p1 - p2 : p1 + p2;
+//    float distance = FLT_MAX;
+
+//    QVector3D position;
+
+//    if (t > 0 && t < distance)
+//    {
+//        distance = t;
+//        position = ray.origin + t * ray.direction;
+//        normal = (position - _center).normalized();
+
+//        return true;
+//    }
+//    return false;
+
+    QVector3D center = /*model **/ _center;
+    QVector3D oc = ray.origin - _center;
+    float a = QVector3D::dotProduct(ray.direction, ray.direction);
+    float b = 2 * QVector3D::dotProduct(ray.direction, ray.origin - center);
+    float c = QVector3D::dotProduct(ray.origin - center, ray.origin - center) - (_radius * _radius);
+
+    float discriminant = b*b - 4*a*c;
+
+    if(discriminant < 0)
     {
-        return false;
+        return -1;
     }
-    float p2 = sqrt(p2sqr);
-    t = p1 - p2 > 0 ? p1 - p2 : p1 + p2;
-    float distance = FLT_MAX;
-
-    QVector3D position;
-
-    if (t > 0 && t < distance)
+    else
     {
-        distance = t;
-        position = ray.origin + t * ray.direction;
-        normal = (position - _center).normalized();
+        float numerator = - b - sqrt(discriminant);
 
-        return true;
+        return numerator / (2.0 * a);
+
     }
-    return false;
-
 }
 
 
