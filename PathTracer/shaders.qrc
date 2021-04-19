@@ -4,4 +4,9 @@
         <file>fragmentShader.glsl</file>
         <file>vertexShader.glsl</file>
     </qresource>
+
+    <qresource prefix="/textures">
+        <file>Texturas/Ground.jpg</file>
+    </qresource>
+
 </RCC>

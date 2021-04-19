@@ -16,8 +16,6 @@ Plane::Plane()
 
     for(unsigned int i = 0; i < points.size(); i++)
     {
-       //points4D.push_back(QVector4D(point.x(), point.y(), point.z(), 1));
-
         points[i] = rot * points[i];
         points[i] = trans * points[i];
 
@@ -48,25 +46,30 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 
     std::vector<QVector4D> points4D;
 
+    normals = {{0, 0, 1}, {0, 0, 1},
+                {0, 0, 1}, {0, 0, 1}};
+
+    QMatrix4x4 planeModel = translation * rotation * scale;
     for(unsigned int i = 0; i < points.size(); i++)
     {
-       //points4D.push_back(QVector4D(point.x(), point.y(), point.z(), 1));
-        points[i] = scale * points[i];
 
-        points[i] = rotation * points[i];
-        points[i] = translation * points[i];
+        points[i] = planeModel * points[i];
+        normals[i] = /*planeModel.inverted().transposed() **/ normals[i];
+//        float u, v;
+//        QVector3D e1 = QVector3D(normals[i].y(), - normals[i].x(), 0).normalized();
+//        QVector3D e2 = QVector3D::crossProduct(normals[i], e1).normalized();
 
+//        u = QVector3D::dotProduct(e1, points[i]);
+//        v = QVector3D::dotProduct(e2, points[i]);
     }
 
     indices = {0, 2, 1, 1, 2, 3};
 
-    normals = {{0, 0, 1}, {0, 0, 1},
-                {0, 0, 1}, {0, 0, 1}};
-
     _points = points;
     _indices = indices;
     _normals = normals;
-
+    _texCoords = {{0, 1, 0}, {1, 1, 0},
+                 {0, 0, 0}, {1, 0, 0}};
     _material.color = QVector3D(0, 1, 0);
 }
 

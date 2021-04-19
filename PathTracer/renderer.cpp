@@ -148,83 +148,13 @@ void Renderer::wheelEvent(QWheelEvent *event)
 
 
 
-//int getIndex( int i, int j, int n )
-//{
-//    return j + i * ( n + 1 );
-//}
-
-//void Renderer::createSphere()
-//{
-//    const int n = 10;
-//    const int m = 10;
-
-//    const int numTriangles = 2 * n * m;
-//    const int numVertices = ( n + 1 ) * ( m + 1 );
-
-//    std::vector<QVector3D> points;
-//    for( unsigned int i = 0; i <= n; i++ )
-//    {
-//        for( unsigned int j = 0; j <= m; j++ )
-//        {
-//            //Atualizar as coordenadas de textura
-//            float s = (float) i / n;
-//            float t = (float) j / m;
-//            //texCoords.push_back(glm::vec2(s,t));
-
-//            //Calcula os parâmetros
-//            double theta = 2 * s * M_PI;
-//            double phi = t * M_PI;
-//            double sinTheta = sin( theta );
-//            double cosTheta = cos( theta );
-//            double sinPhi = sin( phi );
-//            double cosPhi = cos( phi );
-
-//            //Calcula os vértices == equacao da esfera
-//            points.push_back( QVector3D(cosTheta * sinPhi,
-//                                          cosPhi,
-//                                          sinTheta * sinPhi) );
-//        }
-//    }
-
-//    std::vector<unsigned int> indicesS;
-//    indicesS.resize(numTriangles*3);
-
-//    unsigned int startIndex = _points.size();
-//    _points.insert(_points.end(),points.begin(),points.end());
-
-//    std::vector<QVector3D> normals;
-//    normals = points;
-
-//    _normals.insert(_normals.end(),normals.begin(),normals.end());
-
-//    //Preenche o vetor com a triangulação
-//    unsigned int k = 0;
-//    for( unsigned int i = 0; i < n; i++ )
-//    {
-//        for( unsigned int j = 0; j < m; j++ )
-//        {
-//            indicesS[ k++ ] = getIndex( i + 1, j, n ) + startIndex;
-//            indicesS[ k++ ] = getIndex( i + 1, j + 1, n ) + startIndex;
-//            indicesS[ k++ ] = getIndex( i, j, n ) + startIndex;
-
-
-//            indicesS[ k++ ] = getIndex( i + 1, j + 1, n ) + startIndex;
-//            indicesS[ k++ ] = getIndex( i, j + 1, n ) + startIndex;
-//            indicesS[ k++ ] = getIndex( i, j, n ) + startIndex;
-//        }
-//    }
-
-//    _indices.insert(_indices.end(),indicesS.begin(),indicesS.end());
-//}
-
-
 void Renderer::initializeGL()
 {
     initializeOpenGLFunctions();
     makeCurrent();
 
     QMatrix4x4 rot, trans, scale;
-    scale.scale(QVector3D(100, 100, 100));
+    scale.scale(QVector3D(5, 5, 5));
     rot.rotate(90, QVector3D(1, 0 , 0));
     trans.translate(QVector3D(0, -1, 0));
     Plane *p =  new Plane(trans, rot, scale);
@@ -232,9 +162,10 @@ void Renderer::initializeGL()
     material.color = QVector3D(1, 1, 0);
     //material.isReflective = true;
     p->setMaterial(material);
+    p->setTexture(":/textures/Texturas/Ground.jpg");
     _objects.push_back(p);
     material.color = QVector3D(1, 1, 1);
-    material.isReflective = false;
+    material.isReflective = true;
 
     Sphere *s =  new Sphere();
     s->setMaterial(material);
@@ -261,7 +192,7 @@ void Renderer::initializeGL()
     material.isReflective = false;
 
     p2->setMaterial(material);
-    _objects.push_back(p2);
+   // _objects.push_back(p2);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 0 , 1));
@@ -272,9 +203,9 @@ void Renderer::initializeGL()
 
     Plane *p3 =  new Plane(trans, rot, scale);
     material.color = QVector3D(0.4,0.8,0.5);
-    material.isReflective = true;
+   // material.isReflective = true;
     p3->setMaterial(material);
-    _objects.push_back(p3);
+   // _objects.push_back(p3);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;

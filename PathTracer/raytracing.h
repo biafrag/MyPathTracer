@@ -26,12 +26,6 @@ public:
 
 private:
 
-    Ray CreateRay(QVector3D origin, QVector3D direction);
-    Ray CreateCameraRay(QVector3D uv, QMatrix4x4 model, QMatrix4x4 proj);
-
-    void AddPixels(QVector3D uv, QMatrix4x4 model, QMatrix4x4 proj);
-    RayHit CreateRayHit();
-
     void IntersectGroundPlane(Ray ray, RayHit &bestHit);
     RayHit Trace(Ray ray);
 
@@ -45,7 +39,14 @@ private:
 
     QVector3D getRayPoint(float t, Ray ray);
 
-    QColor getColorAt(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert);
+    QColor getColorAt(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert = -1);
+
+    QColor calculateAmbient(Object *object, Light light, QVector3D point, int ind1 = -1);
+
+    QColor calculateDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 = -1);
+
+    QColor calculateSpecular(Object *object, Light light, QVector3D point, QVector3D N, int ind1 = -1);
+
 
 private:
 

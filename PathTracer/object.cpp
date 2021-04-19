@@ -37,6 +37,13 @@ std::vector<QVector3D> Object::getNormals(QMatrix4x4 matrix)
 
 
 
+std::vector<QVector3D> Object::getTexCoordinates()
+{
+    return _texCoords;
+}
+
+
+
 Object::Material Object::getMaterial()
 {
     return  _material;
@@ -54,4 +61,12 @@ void Object::setMaterial(Object::Material material)
 ObjectType Object::getObjectType()
 {
     return _type;
+}
+
+
+
+void Object::setTexture(QString path)
+{
+    _material.hasTexture = true;
+    _material.texture = QImage(path);
 }

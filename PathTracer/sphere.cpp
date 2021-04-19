@@ -229,7 +229,6 @@ float Sphere::intersectsWith(Ray ray, QMatrix4x4 model)
 
     _model = model;
     QVector3D center = model * _center;
-    QVector3D oc = ray.origin - _center;
     float a = QVector3D::dotProduct(ray.direction, ray.direction);
     float b = 2 * QVector3D::dotProduct(ray.direction, ray.origin - center);
     float c = QVector3D::dotProduct(ray.origin - center, ray.origin - center) - (_radius * _radius);

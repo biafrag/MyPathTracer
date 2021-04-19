@@ -7,6 +7,7 @@
 #include "light.h"
 #include "ray.h"
 #include "ObjectType.h"
+#include <QImage>
 
 class Object : public QObject, protected QOpenGLExtraFunctions
 {
@@ -17,7 +18,11 @@ public:
         QVector3D specular;
         QVector3D color;
 
-        bool isReflective;
+        bool isReflective = false;
+
+        bool hasTexture = false;
+
+        QImage texture;
     };
 
     Object();
@@ -36,11 +41,15 @@ public:
     std::vector <unsigned int> getIndices();
     std::vector <QVector3D> getVertices(QMatrix4x4 matrix = QMatrix4x4());
     std::vector <QVector3D> getNormals(QMatrix4x4 matrix = QMatrix4x4());
+    std::vector <QVector3D> getTexCoordinates();
+
     Material getMaterial();
 
     void setMaterial(Material material);
 
     ObjectType getObjectType();
+    
+    void setTexture(QString path);
 
 
 protected:
