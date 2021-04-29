@@ -11,7 +11,7 @@ Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
     _camera.center = QVector3D(0.f,0.f,0.f);
-    _camera.eye =  QVector3D(0.f,0.f,5.f);
+    _camera.eye =  QVector3D(0.f,0.f,10.f);
     _camera.up = QVector3D(0.f,2.f,0.f);
     _camera.zNear = 0.01f;
     _camera.zFar  = 1000.f;
@@ -188,13 +188,13 @@ void Renderer::initializeGL()
     s2->setMaterial(material);
     _objects.push_back(s2);
 
-    Sphere *s3 =  new Sphere(QVector3D(0, 0, 5), 0.5);
+    Sphere *s3 =  new Sphere(QVector3D(3, 1, 1), 0.5);
     s3->setMaterial(material);
     _objects.push_back(s3);
 
-    Sphere *s4 =  new Sphere(QVector3D(0, 0, 3), 0.5);
+    Sphere *s4 =  new Sphere(QVector3D(0, -3, 1), 0.5);
     s4->setMaterial(material);
-    //_objects.push_back(s4);
+    _objects.push_back(s4);
 
     material.isReflective = false;
     rot.setToIdentity();
@@ -298,7 +298,7 @@ void Renderer::initializeGL()
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
     t->setMaterial(material);
-    _objects.push_back(t);
+    //_objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();
