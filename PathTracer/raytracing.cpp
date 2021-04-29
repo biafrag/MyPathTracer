@@ -353,7 +353,7 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
 
             if(material.isReflective)
             {
-                float reflectivity = 1;
+                float reflectivity = 0.1;
                corF = QColor(std::fmin((1 - reflectivity) * corF.red() + cor.red() * reflectivity , 255), std::fmin((1 - reflectivity) * corF.green() + cor.green()* reflectivity, 255), std::fmin((1 - reflectivity)  * corF.blue() + cor.blue() * reflectivity, 255));
             }
             else

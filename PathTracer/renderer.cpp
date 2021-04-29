@@ -184,15 +184,19 @@ void Renderer::initializeGL()
     //material.isReflective = false;
     material.color = QVector3D(1, 0.3, 0.7);
 
-    Sphere *s2 =  new Sphere(QVector3D(-3, 1, 1), 0.5);
+    Sphere *s2 =  new Sphere(QVector3D(-3, 1, 0.5), 0.5);
     s2->setMaterial(material);
     _objects.push_back(s2);
 
-    Sphere *s3 =  new Sphere(QVector3D(3, 1, 1), 0.5);
+    material.isReflective = true;
+
+    Sphere *s3 =  new Sphere(QVector3D(3, 1, 0.5), 0.5);
     s3->setMaterial(material);
     _objects.push_back(s3);
 
-    Sphere *s4 =  new Sphere(QVector3D(0, -3, 1), 0.5);
+    material.isReflective = false;
+
+    Sphere *s4 =  new Sphere(QVector3D(0, -3, 0.5), 0.5);
     s4->setMaterial(material);
     _objects.push_back(s4);
 
