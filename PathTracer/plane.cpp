@@ -50,6 +50,9 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
                 {0, 0, 1}, {0, 0, 1}};
 
     QMatrix4x4 planeModel = translation * rotation * scale;
+
+    _texCoords = {{0, 1, 0}, {1, 1, 0},
+                 {0, 0, 0}, {1, 0, 0}};
     for(unsigned int i = 0; i < points.size(); i++)
     {
 
@@ -61,6 +64,9 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 
 //        u = QVector3D::dotProduct(e1, points[i]);
 //        v = QVector3D::dotProduct(e2, points[i]);
+//        _texCoords.push_back(QVector3D(u, v, 0));
+
+        //_texCoords[i] = planeModel * _texCoords[i];
     }
 
     indices = {0, 2, 1, 1, 2, 3};
@@ -68,8 +74,8 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
     _points = points;
     _indices = indices;
     _normals = normals;
-    _texCoords = {{0, 1, 0}, {1, 1, 0},
-                 {0, 0, 0}, {1, 0, 0}};
+//    _texCoords = {{0, 1, 0}, {1, 1, 0},
+//                 {0, 0, 0}, {1, 0, 0}};
     _material.color = QVector3D(0, 1, 0);
 }
 

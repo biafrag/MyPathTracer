@@ -13,26 +13,34 @@ Renderer::Renderer(QWidget *parent)
     _camera.center = QVector3D(0.f,0.f,0.f);
     _camera.eye =  QVector3D(0.f,0.f,5.f);
     _camera.up = QVector3D(0.f,2.f,0.f);
-    _camera.zNear = 0.1f;
-    _camera.zFar  = 100.f;
+    _camera.zNear = 0.01f;
+    _camera.zFar  = 1000.f;
     _camera.fov  = 60.f;
 
     _light.position = {-50, 50, 50};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
-    _light.specular = {1.0f,  1.0f, 1.0f};
-    _light.shi = 32.0f;
+    _light.specular = {0.3f,  0.3f, 0.3f};
+    _light.shi = 60.0f;
 
     Light light2;
     light2.position = {50, 50, 50};
     light2.ambient = {0.3f, 0.3f, 0.3f};
-    light2.diffuse = {1.0f, 1.0f, 1.0f};
-    light2.specular = {1.0f,  1.0f,1.0f};
-    light2.shi = 32.0f;
+    light2.diffuse = {0.8f, 0.8f, 0.8f};
+    light2.specular = {0.3f, 0.3f, 0.3f};
+    light2.shi = 60.0f;
+
+    Light light3;
+    light3.position = {50, -50, -50};
+    light3.ambient = {0.3f, 0.3f, 0.3f};
+    light3.diffuse = {0.8f, 0.8f, 0.8f};
+    light3.specular = {0.3f, 0.3f, 0.3f};
+    light3.shi = 60.0f;
 
     _lights.push_back(_light);
 
     _lights.push_back(light2);
+    //_lights.push_back(light3);
 
 
 }
@@ -163,49 +171,111 @@ void Renderer::initializeGL()
     //material.isReflective = true;
     p->setMaterial(material);
     p->setTexture(":/textures/Texturas/Ground.jpg");
-    _objects.push_back(p);
-    material.color = QVector3D(1, 1, 1);
-    material.isReflective = true;
+    //_objects.push_back(p);
+    material.color = QVector3D(0.5, 0, 0);
+    //material.color = QVector3D(1, 1, 1);
+
+    //material.isReflective = true;
 
     Sphere *s =  new Sphere();
     s->setMaterial(material);
-    _objects.push_back(s);
+    //_objects.push_back(s);
 
-    material.isReflective = false;
-    material.color = QVector3D(1, 0, 0);
+    //material.isReflective = false;
+    material.color = QVector3D(1, 0.3, 0.7);
 
-    Sphere *s2 =  new Sphere(QVector3D(-3, 0, 0), 0.5);
+    Sphere *s2 =  new Sphere(QVector3D(-3, 1, 1), 0.5);
     s2->setMaterial(material);
     _objects.push_back(s2);
 
+    Sphere *s3 =  new Sphere(QVector3D(0, 0, 5), 0.5);
+    s3->setMaterial(material);
+    _objects.push_back(s3);
+
+    Sphere *s4 =  new Sphere(QVector3D(0, 0, 3), 0.5);
+    s4->setMaterial(material);
+    //_objects.push_back(s4);
+
     material.isReflective = false;
     rot.setToIdentity();
-    rot.rotate(90, QVector3D(0, 1 , 0));
+    rot.rotate(90, QVector3D(1, 0 , 0));
     trans.setToIdentity();
-    trans.translate(QVector3D(1, -1, 0));
+    trans.translate(QVector3D(0, 100, 0));
     scale.setToIdentity();
-    scale.scale(QVector3D(30, 30, 30));
+    scale.scale(QVector3D(100, 100, 100));
 
 
     Plane *p2 =  new Plane(trans, rot, scale);
     material.color = QVector3D(1,0.5,0.1);
-    material.isReflective = false;
-
+    //material.isReflective = true;
     p2->setMaterial(material);
-   // _objects.push_back(p2);
+
+    p2->setTexture(":/textures/Texturas/Ceu2.jpg");
+    //_objects.push_back(p2);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 0 , 1));
     trans.setToIdentity();
-    trans.translate(QVector3D(0, -1, -3));
+    trans.translate(QVector3D(0, 0, 0));
     scale.setToIdentity();
-    scale.scale(QVector3D(30, 30, 30));
+    scale.scale(QVector3D(5, 5, 5));
 
     Plane *p3 =  new Plane(trans, rot, scale);
     material.color = QVector3D(0.4,0.8,0.5);
    // material.isReflective = true;
     p3->setMaterial(material);
-   // _objects.push_back(p3);
+    //p3->setTexture(":/textures/Texturas/Ceu2.jpg");
+    p3->setTexture(":/textures/Texturas/Ground.jpg");
+
+    _objects.push_back(p3);
+
+    rot.setToIdentity();
+    rot.rotate(90, QVector3D(0, 1 , 0));
+    trans.setToIdentity();
+    trans.translate(QVector3D(-100, 0, 0));
+    scale.setToIdentity();
+    scale.scale(QVector3D(100, 100, 100));
+
+    Plane *p4 =  new Plane(trans, rot, scale);
+    material.color = QVector3D(0.4,0.8,0.5);
+   // material.isReflective = true;
+    p4->setMaterial(material);
+    p4->setTexture(":/textures/Texturas/Ceu2.jpg");
+
+    //_objects.push_back(p4);
+
+    rot.setToIdentity();
+    rot.rotate(90, QVector3D(0, 1 , 0));
+    trans.setToIdentity();
+    trans.translate(QVector3D(100, 0, 0));
+    scale.setToIdentity();
+    scale.scale(QVector3D(100, 100, 100));
+
+    Plane *p5 =  new Plane(trans, rot, scale);
+    material.color = QVector3D(0.4,0.8,0.5);
+   // material.isReflective = true;
+    p5->setMaterial(material);
+    p5->setTexture(":/textures/Texturas/Ceu2.jpg");
+
+
+    //_objects.push_back(p5);
+
+
+    rot.setToIdentity();
+    rot.rotate(90, QVector3D(0, 0 , 1));
+    trans.setToIdentity();
+    trans.translate(QVector3D(0, 0, 100));
+    scale.setToIdentity();
+    scale.scale(QVector3D(100, 100, 100));
+
+    Plane *p6 =  new Plane(trans, rot, scale);
+    material.color = QVector3D(0.4,0.8,0.5);
+   // material.isReflective = true;
+    p6->setMaterial(material);
+    p6->setTexture(":/textures/Texturas/Ceu2.jpg");
+    //_objects.push_back(p6);
+
+
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;
@@ -218,14 +288,17 @@ void Renderer::initializeGL()
     std::vector<QVector2D> texCoords;
     std::vector<QVector3D> normals;
 
-    readFile("../PathTracer/Malhas/teapot.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+     material.isReflective = true;
+     material.color = QVector3D(0.5,0.5,0.5);
+
+    readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
     if(normals.size() == 0)
     {
         //normals = points;
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
     t->setMaterial(material);
-    //_objects.push_back(t);
+    _objects.push_back(t);
     for(unsigned int i = 0; i < _objects.size(); i++)
     {
         _objects[i]->initialize();

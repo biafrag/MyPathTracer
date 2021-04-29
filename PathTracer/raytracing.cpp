@@ -262,11 +262,11 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
     {
         //Checa se luz vai cotribuir para o ponto
         //QVector3D ambient = light.ambient * material.color;
-        QColor ambient = calculateAmbient(object, light, point, indVert);
+        //QColor ambient = calculateAmbient(object, light, point, indVert);
 
         //QVector3D aux = ambient * 255;
         //QColor cor(std::fmin(255, aux.x()), std::fmin(255, aux.y()), std::fmin(255, aux.z()));
-        corF = QColor(std::fmin(corF.red() + ambient.red(), 255), std::fmin(corF.green() + ambient.green(), 255), std::fmin(corF.blue() + ambient.blue(), 255));
+       // corF = QColor(std::fmin(corF.red() + ambient.red(), 255), std::fmin(corF.green() + ambient.green(), 255), std::fmin(corF.blue() + ambient.blue(), 255));
         QVector3D N;
         if(object->getObjectType() == ObjectType::SPHERE)
         {
@@ -320,7 +320,7 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
             if(objRef != nullptr)
             {
                 QColor cor = getColorAt(reflection_intersection_position, reflection_ray, tRef, objRef, indObjRef, indVertRef) ;
-                corF = QColor(std::fmin(corF.red()*0.3 + cor.red(), 255), std::fmin(corF.green()*0.3 + cor.green(), 255), std::fmin(corF.blue()*0.3 + cor.blue(), 255));
+                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
             }
 
         }
@@ -337,20 +337,36 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
             {
                 diffuse = calculateDiffuse(object, light, lambertian, point, indVert); //Adicionar propriedade dos materiais do objeto depois
                 specular = calculateSpecular(object, light, point, N);
+//                if(material.isReflective)
+//                {
+//                    //float reflectivity = 0.1;
 
+//                    specular = QColor(std::fmin(255, specular.red() * corF.red()/* * reflectivity*/), std::fmin(255, specular.green() * corF.green() /** reflectivity*/), std::fmin(255, specular.blue() * corF.blue() /** reflectivity*/));
+//                }
             }
             //QColor aux = (diffuse + specular);
+            QColor ambient = calculateAmbient(object, light, point, indVert);
+            ambient = calculateAmbient(object, light, point, indVert);
 
-            QColor cor(std::fmin(255, diffuse.red() + specular.red()), std::fmin(255, diffuse.green() + specular.green()), std::fmin(255, diffuse.blue() + specular.blue()));
+            QColor cor(std::fmin(255, diffuse.red() + ambient.red() + specular.red()), std::fmin(255, diffuse.green() + specular.green() + ambient.green()), std::fmin(255, diffuse.blue() + specular.blue() + ambient.blue()));
+            //corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
 
             if(material.isReflective)
             {
-                corF = QColor(std::fmin(corF.red()+ cor.red()*0, 255), std::fmin(corF.green()  + cor.green()*0, 255), std::fmin(corF.blue() + cor.blue()*0, 255));
+                float reflectivity = 1;
+               corF = QColor(std::fmin((1 - reflectivity) * corF.red() + cor.red() * reflectivity , 255), std::fmin((1 - reflectivity) * corF.green() + cor.green()* reflectivity, 255), std::fmin((1 - reflectivity)  * corF.blue() + cor.blue() * reflectivity, 255));
             }
             else
             {
-                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green() , 255), std::fmin(corF.blue() + cor.blue() , 255));
             }
+              //corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green() , 255), std::fmin(corF.blue() + cor.blue() , 255));
+
+        }
+        else
+        {
+            QColor ambient = calculateAmbient(object, light, point, indVert);
+            corF = QColor(std::fmin(corF.red() + ambient.red(), 255), std::fmin(corF.green() + ambient.green(), 255), std::fmin(corF.blue() + ambient.blue(), 255));
         }
     }
 
@@ -459,7 +475,7 @@ QImage RayTracing::generateRayTracingImage()
     //b é a largura real
     float b = (a * _width)/_height;
 
-    unsigned int aadepth = 4;
+    unsigned int aadepth = 1;
 
     //Passada do JFA
     auto start  = std::chrono::high_resolution_clock::now();
