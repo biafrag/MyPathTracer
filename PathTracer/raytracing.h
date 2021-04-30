@@ -18,7 +18,7 @@ public:
 
 
     RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
-               std::vector<Object *> objects, std::vector<Light> lights);
+               std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor = {0, 0, 0});
 
     QImage generateRayTracingImage();
 
@@ -53,6 +53,8 @@ private:
     QMatrix4x4 _model;
 
     QVector3D _Xe, _Ye, _Ze;
+
+    QVector3D _backgroundColor = {0, 0, 0};
 
     Renderer::Camera _camera;
 

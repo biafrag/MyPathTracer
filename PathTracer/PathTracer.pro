@@ -18,7 +18,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    material.cpp \
     object.cpp \
+    pathtracing.cpp \
     plane.cpp \
     raytracing.cpp \
     renderer.cpp \
@@ -29,7 +31,9 @@ HEADERS += \
     ObjectType.h \
     light.h \
     mainwindow.h \
+    material.h \
     object.h \
+    pathtracing.h \
     plane.h \
     ray.h \
     raytracing.h \

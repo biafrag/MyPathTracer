@@ -44,14 +44,14 @@ std::vector<QVector3D> Object::getTexCoordinates()
 
 
 
-Object::Material Object::getMaterial()
+Material Object::getMaterial()
 {
     return  _material;
 }
 
 
 
-void Object::setMaterial(Object::Material material)
+void Object::setMaterial(Material material)
 {
     _material = material;
 }
@@ -67,6 +67,5 @@ ObjectType Object::getObjectType()
 
 void Object::setTexture(QString path)
 {
-    _material.hasTexture = true;
-    _material.texture = QImage(path);
+    _material.setTexture(QImage(path));
 }

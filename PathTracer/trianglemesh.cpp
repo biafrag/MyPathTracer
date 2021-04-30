@@ -72,7 +72,7 @@ void TriangleMesh::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMa
         setUniformArrayValue<float>(_program, "lights", "shininess", i, lights[i].shi);
     }
 
-    _program->setUniformValue("material.color", _material.color);
+    _program->setUniformValue("material.color", _material.getAlbedo());
 
 
     QMatrix4x4 mvp = projMatrix * viewMatrix * modelMatrix;

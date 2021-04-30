@@ -29,9 +29,6 @@ Plane::Plane()
     _points = points;
     _indices = indices;
     _normals = normals;
-
-    _material.color = QVector3D(0, 1, 0);
-
 }
 
 
@@ -58,15 +55,6 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 
         points[i] = planeModel * points[i];
         normals[i] = /*planeModel.inverted().transposed() **/ normals[i];
-//        float u, v;
-//        QVector3D e1 = QVector3D(normals[i].y(), - normals[i].x(), 0).normalized();
-//        QVector3D e2 = QVector3D::crossProduct(normals[i], e1).normalized();
-
-//        u = QVector3D::dotProduct(e1, points[i]);
-//        v = QVector3D::dotProduct(e2, points[i]);
-//        _texCoords.push_back(QVector3D(u, v, 0));
-
-        //_texCoords[i] = planeModel * _texCoords[i];
     }
 
     indices = {0, 2, 1, 1, 2, 3};
@@ -74,9 +62,7 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
     _points = points;
     _indices = indices;
     _normals = normals;
-//    _texCoords = {{0, 1, 0}, {1, 1, 0},
-//                 {0, 0, 0}, {1, 0, 0}};
-    _material.color = QVector3D(0, 1, 0);
+
 }
 
 
@@ -146,7 +132,7 @@ void Plane::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, c
             setUniformArrayValue<float>(_program, "lights", "shininess", i, lights[i].shi);
         }
 
-        _program->setUniformValue("material.color", _material.color);
+        _program->setUniformValue("material.color", _material.getAlbedo());
 
 
         QMatrix4x4 mvp = projMatrix * viewMatrix * modelMatrix;

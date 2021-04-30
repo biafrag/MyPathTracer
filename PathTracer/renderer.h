@@ -31,23 +31,11 @@ public:
 
     };
 
-//    struct Sphere
-//    {
-//        QVector3D position;
-//        float radius;
-
-//    };
-
-//    struct Material
-//    {
-//        QVector3D albedo;
-//        QVector3D specular;
-//        QVector3D color;
-//    };
 
     QImage getRayTracedImage(float &time);
 
 private:
+    void createMaterialLib();
     void createScene();
     virtual void initializeGL() override;
     virtual void paintGL() override;
@@ -85,7 +73,6 @@ private:
     Light _light;
 
     std::vector<Light> _lights;
-    //Material _material;
 
     std::vector<Object *> _objects;
 };

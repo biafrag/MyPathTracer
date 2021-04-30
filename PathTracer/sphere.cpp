@@ -73,8 +73,6 @@ Sphere::Sphere(QVector3D center, float radius)
     }
 
     _indices = indicesS;
-
-    _material.color = QVector3D(1, 0, 0);
 }
 
 
@@ -140,7 +138,7 @@ void Sphere::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, 
         setUniformArrayValue<float>(_program, "lights", "shininess", i, lights[i].shi);
     }
 
-    _program->setUniformValue("material.color", _material.color);
+    _program->setUniformValue("material.color", _material.getAlbedo());
 
 
     QMatrix4x4 mvp = projMatrix * viewMatrix * modelMatrix;

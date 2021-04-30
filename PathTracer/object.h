@@ -8,22 +8,11 @@
 #include "ray.h"
 #include "ObjectType.h"
 #include <QImage>
+#include "material.h"
 
 class Object : public QObject, protected QOpenGLExtraFunctions
 {
 public:
-    struct Material
-    {
-        QVector3D albedo;
-        QVector3D specular;
-        QVector3D color;
-
-        bool isReflective = false;
-
-        bool hasTexture = false;
-
-        QImage texture;
-    };
 
     Object();
 

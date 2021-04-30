@@ -3,7 +3,7 @@
 
 struct Ray
 {
-    int energy = 5;
+    QVector3D energy = QVector3D(1.0, 1.0, 1.0);
     QVector3D origin;
     QVector3D direction;
 };

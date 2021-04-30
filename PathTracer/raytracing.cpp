@@ -9,13 +9,14 @@
 #define M_PI 3.1415
 
 RayTracing::RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
-                       std::vector<Object *> objects, std::vector<Light> lights)
+                       std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor)
 
     : _model(model),
       _camera(cam),
       _objects(objects),
       _lights(lights),
       _width(w),
+      _backgroundColor(backgroundColor),
       _height(h)
 {
     _Ze = (_camera.eye - cam.center).normalized();
@@ -255,7 +256,7 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
     QColor corF = QColor(0, 0, 0);
 
 
-    Object::Material material = object->getMaterial();
+    Material material = object->getMaterial();
 
 
     for(auto light : _lights)
@@ -293,23 +294,12 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
              N = normalInt.normalized();
         }
 
-        if(material.isReflective)
+        if(material.getReflectivity() < 1.0)
         {
-            // reflection from objects with specular intensity
-            float dot1 = QVector3D::dotProduct(N, -ray.direction);
-
-            QVector3D scalar1 = N * dot1;
-            QVector3D add1 = scalar1 + ray.direction;
-            QVector3D scalar2 = add1 * 2;
-            QVector3D add2 = scalar2 - ray.direction;
-            //QVector3D reflection_direction = add2.normalized();
-
-
             Ray reflection_ray ;
-            reflection_ray.energy = ray.energy - 1;
+            //reflection_ray.energy = ray.energy - 1;
             reflection_ray.origin = point;
             reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
-            //reflection_ray.direction = reflection_direction;
 
             float tRef;
             Object * objRef;
@@ -321,6 +311,10 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
             {
                 QColor cor = getColorAt(reflection_intersection_position, reflection_ray, tRef, objRef, indObjRef, indVertRef) ;
                 corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
+            }
+            else
+            {
+                corF = QColor(std::fmin(/*corF.red() +*/ _backgroundColor.x()* 255, 255), std::fmin(/*corF.green() + */_backgroundColor.y()* 255, 255), std::fmin(/*corF.blue() + + */_backgroundColor.z()* 255, 255));
             }
 
         }
@@ -337,30 +331,13 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
             {
                 diffuse = calculateDiffuse(object, light, lambertian, point, indVert); //Adicionar propriedade dos materiais do objeto depois
                 specular = calculateSpecular(object, light, point, N);
-//                if(material.isReflective)
-//                {
-//                    //float reflectivity = 0.1;
-
-//                    specular = QColor(std::fmin(255, specular.red() * corF.red()/* * reflectivity*/), std::fmin(255, specular.green() * corF.green() /** reflectivity*/), std::fmin(255, specular.blue() * corF.blue() /** reflectivity*/));
-//                }
             }
-            //QColor aux = (diffuse + specular);
             QColor ambient = calculateAmbient(object, light, point, indVert);
             ambient = calculateAmbient(object, light, point, indVert);
 
             QColor cor(std::fmin(255, diffuse.red() + ambient.red() + specular.red()), std::fmin(255, diffuse.green() + specular.green() + ambient.green()), std::fmin(255, diffuse.blue() + specular.blue() + ambient.blue()));
-            //corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
 
-            if(material.isReflective)
-            {
-                float reflectivity = 0.1;
-               corF = QColor(std::fmin((1 - reflectivity) * corF.red() + cor.red() * reflectivity , 255), std::fmin((1 - reflectivity) * corF.green() + cor.green()* reflectivity, 255), std::fmin((1 - reflectivity)  * corF.blue() + cor.blue() * reflectivity, 255));
-            }
-            else
-            {
-                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green() , 255), std::fmin(corF.blue() + cor.blue() , 255));
-            }
-              //corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green() , 255), std::fmin(corF.blue() + cor.blue() , 255));
+            corF = QColor(std::fmin((1 - material.getReflectivity()) * corF.red() + cor.red() * material.getReflectivity() , 255), std::fmin((1 - material.getReflectivity()) * corF.green() + cor.green()* material.getReflectivity(), 255), std::fmin((1 - material.getReflectivity())  * corF.blue() + cor.blue() * material.getReflectivity(), 255));
 
         }
         else
@@ -375,9 +352,9 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
 
 QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point, int ind1)
 {
-    Object::Material material = object->getMaterial();
+    Material material = object->getMaterial();
     QVector3D color;
-    if(material.hasTexture)
+    if(material.hasTexture())
     {
         std::vector<unsigned int> indices = object->getIndices();
         std::vector<QVector3D> vertices = object->getVertices(_model);
@@ -389,13 +366,13 @@ QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point
 
         QVector3D alfas = getBaricentricCoordinates(vertices[i1], vertices[i2], vertices[i3], point);
         QVector3D texInt = alfas.x() * texCoords[i1] + alfas.y() * texCoords[i2] + alfas.z() * texCoords[i3];
-        QImage texture = material.texture;
+        QImage texture = material.getTexture();
         QColor aux = texture.pixelColor(texInt.x() * texture.width(),/* texture.height() - */(texInt.y() * texture.height()));
         color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
     }
     else
     {
-        color = material.color;
+        color = material.getAlbedo();
     }
     QVector3D corVec = light.ambient * color;
     QColor cor = QColor(std::fmin(corVec.x() * 255, 255), std::fmin(corVec.y() * 255, 255), std::fmin(corVec.z() * 255, 255));
@@ -407,10 +384,10 @@ QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point
 
 QColor RayTracing::calculateDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 )
 {
-    Object::Material material = object->getMaterial();
+   Material material = object->getMaterial();
 
     QVector3D color;
-    if(material.hasTexture)
+    if(material.hasTexture())
     {
         std::vector<unsigned int> indices = object->getIndices();
         std::vector<QVector3D> vertices = object->getVertices(_model);
@@ -422,13 +399,13 @@ QColor RayTracing::calculateDiffuse(Object *object, Light light, float lambertia
 
         QVector3D alfas = getBaricentricCoordinates(vertices[i1], vertices[i2], vertices[i3], point);
         QVector3D texInt = alfas.x() * texCoords[i1] + alfas.y() * texCoords[i2] + alfas.z() * texCoords[i3];
-        QImage texture = material.texture;
+        QImage texture = material.getTexture();
         QColor aux = texture.pixelColor(texInt.x() * texture.width(), texture.height() - (texInt.y() * texture.height()));
         color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
     }
     else
     {
-        color = material.color;
+        color = material.getAlbedo();
     }
 
     QVector3D corVec = lambertian * light.diffuse * color;
@@ -447,16 +424,17 @@ QColor RayTracing::calculateSpecular(Object *object, Light light, QVector3D poin
     QVector3D H = (L+V).normalized();
     float dotP = QVector3D::dotProduct(N,H);
     float ispec;
+    Material material = object->getMaterial();
 
     if(dotP > 0)
     {
-        ispec = std::pow(dotP, light.shi);
+        ispec = std::pow(dotP, material.getShi());
     }
     else
     {
         ispec = 0;
     }
-    QVector3D specular = light.specular * ispec;
+    QVector3D specular = material.getSpecular() * light.specular * ispec;
 
     QColor cor = QColor(std::fmin(specular.x() * 255, 255), std::fmin(specular.y() * 255, 255), std::fmin(specular.z() * 255, 255));
 
@@ -598,7 +576,7 @@ QImage RayTracing::generateRayTracingImage()
                     else
                     {
                         //Se não intersectou é porque é background
-                        QColor cor = QColor(0, 0, 0);
+                        QColor cor = QColor(_backgroundColor.x() * 255, _backgroundColor.y() * 255, _backgroundColor.z() * 255);
                         totalColor = QVector3D(totalColor.x() + cor.red(), totalColor.y() + cor.green(), totalColor.z() + cor.blue());
                     }
                 }
