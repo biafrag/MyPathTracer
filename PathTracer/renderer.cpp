@@ -50,7 +50,7 @@ Renderer::Renderer(QWidget *parent)
 
 QImage Renderer::getRayTracedImage(float &time)
 {
-    RayTracing r(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.3, 0.3, 0.8));
+    RayTracing r(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0, 0, 0));
 
     //Levando vértices e normais pro espaço do modelo
     std::vector<QVector3D> vertices;

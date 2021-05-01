@@ -106,7 +106,9 @@ void Material::setTexture(QImage texture)
 
  Material Material::Gold()
 {
-    return Material("Gold", QVector3D(0, 0, 0), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0, false);
+    //return Material("Gold", QVector3D(0, 0, 0), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0, false);
+     return Material("Gold", QVector3D(1, 0.88, 0.43), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0, false);
+
 }
 
 

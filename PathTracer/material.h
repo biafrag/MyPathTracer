@@ -34,9 +34,9 @@ public:
 private:
     QString _name;
     QVector3D _albedo = {1, 1, 1};
-    QVector3D _specular = {0, 0, 0};
+    QVector3D _specular = {1, 1, 1};
     float _reflectivity = 1;
-    float _shininess;
+    float _shininess = 60.0f;
     bool _hasTexture = false;
     QImage _texture;
 };

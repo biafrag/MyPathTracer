@@ -40,12 +40,15 @@ private:
     QVector3D getRayPoint(float t, Ray ray);
 
     QColor getColorAt(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert = -1);
+    QColor getColorAt2(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert = -1);
+
+    QVector3D color(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert = -1);
 
     QColor calculateAmbient(Object *object, Light light, QVector3D point, int ind1 = -1);
 
-    QColor calculateDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 = -1);
+    QColor calculatePhongDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 = -1);
 
-    QColor calculateSpecular(Object *object, Light light, QVector3D point, QVector3D N, int ind1 = -1);
+    QColor calculatePhongSpecular(Object *object, Light light, QVector3D point, QVector3D N, int ind1 = -1);
 
 
 private:
