@@ -3,6 +3,8 @@
 #include <QImage>
 #include "renderer.h"
 #include "sphere.h"
+#include "trianglemesh.h"
+
 #include <chrono>
 #include <iostream>
 
@@ -22,20 +24,6 @@ RayTracing::RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
     _Ze = (_camera.eye - cam.center).normalized();
     _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
     _Ye = QVector3D::crossProduct(_Ze, _Xe);
-}
-
-
-
-void RayTracing::IntersectGroundPlane(Ray ray, RayHit &bestHit)
-{
-    // Calculate distance along the ray where the ground plane is intersected
-    float t = -ray.origin.y() / ray.direction.y();
-    if (t > 0 && t < bestHit.distance)
-    {
-        bestHit.distance = t;
-        bestHit.position = ray.origin + t * ray.direction;
-        bestHit.normal = QVector3D(0.0f, 1.0f, 0.0f);
-    }
 }
 
 
@@ -88,10 +76,6 @@ bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int in
     Ray pointLightRay;
     pointLightRay.origin = point;
     pointLightRay.direction = (light.position - point).normalized();
-
-    std::vector<unsigned int> indices;
-    std::vector<QVector3D> vertices;
-    std::vector<QVector3D> normals;
     for(unsigned int o = 0; o < _objects.size(); o++)
     {
         if(o != index)
@@ -108,47 +92,11 @@ bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int in
             }
             else
             {
-                //Checar se raio atinge outro objeto sem ser esse
-                indices = _objects[o]->getIndices();
-                vertices = _objects[o]->getVertices(_model);
-                normals = _objects[o]->getNormals(_model.transposed().inverted());
-
-                for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
+                TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
+                bool verif = mesh->isRayIntersecting(pointLightRay, _model);
+                if(verif)
                 {
-                    int i1 = indices[i];
-                    int i2 = indices[i+1];
-                    int i3 = indices[i+2];
-
-                    //Vetores formados pelos pontos do triângulo
-                    QVector3D e2 = vertices[i3] - vertices[i2];
-                    QVector3D e3 = vertices[i1] - vertices[i3];
-
-                    //Normal ao triângulo
-                    QVector3D normal = QVector3D::crossProduct(e2, e3).normalized();
-
-                    //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
-                    // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
-
-                    float prodDN = QVector3D::dotProduct(pointLightRay.direction, normal);
-                    if(prodDN != 0)
-                    {
-                        //t é a coordenada paramétrica do ponto no raio
-                        float t = (QVector3D::dotProduct(vertices[i1] - point, normal))/prodDN;
-
-                        if(t > 0)
-                        {
-                            //p é o ponto que raio atinge na superfície
-                            QVector3D p = getRayPoint(t, pointLightRay);
-
-                            //Verificar se ponto que raio atinge intersecta o triângulo
-                            bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
-
-                            if(verif)
-                            {
-                                return true;
-                            }
-                        }
-                    }
+                    return true;
                 }
             }
         }
@@ -163,12 +111,7 @@ Object * RayTracing::reflection(Ray ray, float &tCloser, unsigned int &indexObje
 {
     //Variável que vai guardar qual é o menor t, ou seja, qual o ponto mais a frente que o raio atinge
     float tAux = FLT_MAX;
-    //unsigned int vertCloser;
     Object * objectCloser = nullptr;
-    //unsigned int indexObject;
-    std::vector<unsigned int> indices;
-    std::vector<QVector3D> vertices;
-    std::vector<QVector3D> normals;
 
     bool isSphere = false;
 
@@ -185,7 +128,6 @@ Object * RayTracing::reflection(Ray ray, float &tCloser, unsigned int &indexObje
                 if( t < tAux && t>0)
                 {
                     tAux = t;
-                    ///vertCloser = i;
                     objectCloser = _objects[o];
                     indexObject = o;
                     isSphere = true;
@@ -193,49 +135,16 @@ Object * RayTracing::reflection(Ray ray, float &tCloser, unsigned int &indexObje
             }
             else
             {
-                indices = _objects[o]->getIndices();
-                vertices = _objects[o]->getVertices(_model);
-                normals = _objects[o]->getNormals(_model.transposed().inverted());
-
-                for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
+                TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
+                int indTri;
+                float t = mesh->intersectsWithRay(ray, _model, tCloser, indTri);
+                if( t < tCloser && t>0 && indTri >= 0)
                 {
-                    int i1 = indices[i];
-                    int i2 = indices[i+1];
-                    int i3 = indices[i+2];
-
-                    //Vetores formados pelos pontos do triângulo
-                    QVector3D e2 = vertices[i3] - vertices[i2];
-                    QVector3D e3 = vertices[i1] - vertices[i3];
-
-                    //Normal ao triângulo
-                    QVector3D normal = QVector3D::crossProduct(e2, e3).normalized();
-
-                    //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
-                    // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
-
-                    float prodDN = QVector3D::dotProduct(ray.direction, normal);
-                    if(prodDN != 0)
-                    {
-                        //t é a coordenada paramétrica do ponto no raio
-                        float t = (QVector3D::dotProduct(vertices[i1] - ray.origin, normal))/prodDN;
-
-                        //p é o ponto que raio atinge na superfície
-                        QVector3D p = getRayPoint(t, ray);
-
-                        //Verificar se ponto que raio atinge intersecta o triângulo
-                        bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
-
-                        if(verif && t < tAux && t>0)
-                        {
-                            tAux = t;
-                            vertCloser = i;
-                            objectCloser = _objects[o];
-                            indexObject = o;
-                            isSphere = false;
-                        }
-                    }
-
-                  }
+                    tAux = t;
+                    objectCloser = _objects[o];
+                    indexObject = o;
+                    vertCloser = indTri;
+                }
             }
         }
     }
@@ -251,7 +160,7 @@ QVector3D RayTracing::getRayPoint(float t, Ray ray)
 }
 
 
-QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object, int indObj, int indVert)
+QColor RayTracing::getColorAt(QVector3D point, Ray ray, Object *object, int indObj, int indVert)
 {
     QColor corF = QColor(_backgroundColor.x() * 255, _backgroundColor.y() * 255, _backgroundColor.z() * 255);
 
@@ -270,23 +179,8 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
         }
         else
         {
-            std::vector<unsigned int> indices;
-             std::vector<QVector3D> vertices;
-             std::vector<QVector3D> normals;
-
-             indices = object->getIndices();
-             vertices = object->getVertices(_model);
-             normals = object->getNormals(_model.transposed().inverted());
-
-             unsigned int ind1, ind2, ind3;
-             ind1 = indices[indVert];
-             ind2 = indices[indVert + 1];
-             ind3 = indices[indVert + 2];
-
-             //Determinando ponto mais próximo
-             QVector3D alfas= getBaricentricCoordinates(vertices[ind1],vertices[ind2],vertices[ind3], point);
-             QVector3D normalInt = alfas.x() * normals[ind1] + alfas.y() * normals[ind2] + alfas.z() * normals[ind3];
-             N = normalInt.normalized();
+             TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
+             N = mesh->getNormalInsideTriangle(indVert, point, _model);
         }
 
         if(material.getReflectivity() < 1.0)
@@ -300,14 +194,13 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, float t, Object *object,
             unsigned int indObjRef, indVertRef;
             objRef = reflection(reflection_ray, tRef, indObjRef, indVertRef, indObj);
             QVector3D reflection_intersection_position = point + reflection_ray.direction * tRef;
-            Object * obj = object;
 
             if(objRef != nullptr)
             {
                 reflection_ray.timesReflection = ray.timesReflection - 1;
                 reflection_ray.energy = ray.energy * material.getSpecular();
 
-                QColor cor = getColorAt(reflection_intersection_position, reflection_ray, tRef, objRef, indObjRef, indVertRef) ;
+                QColor cor = getColorAt(reflection_intersection_position, reflection_ray, objRef, indObjRef, indVertRef) ;
                 corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
             }
 
@@ -352,18 +245,12 @@ QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point
     QVector3D color;
     if(material.hasTexture())
     {
-        std::vector<unsigned int> indices = object->getIndices();
-        std::vector<QVector3D> vertices = object->getVertices(_model);
-        std::vector<QVector3D> texCoords = object->getTexCoordinates();
+        TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
 
-        unsigned int i1 = indices[ind1];
-        unsigned int i2 = indices[ind1 + 1];
-        unsigned int i3 = indices[ind1 + 2];
+        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, point, _model);
 
-        QVector3D alfas = getBaricentricCoordinates(vertices[i1], vertices[i2], vertices[i3], point);
-        QVector3D texInt = alfas.x() * texCoords[i1] + alfas.y() * texCoords[i2] + alfas.z() * texCoords[i3];
         QImage texture = material.getTexture();
-        QColor aux = texture.pixelColor(texInt.x() * texture.width(),/* texture.height() - */(texInt.y() * texture.height()));
+        QColor aux = texture.pixelColor(texInt.x() * texture.width(), (texInt.y() * texture.height()));
         color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
     }
     else
@@ -385,16 +272,10 @@ QColor RayTracing::calculatePhongDiffuse(Object *object, Light light, float lamb
     QVector3D color;
     if(material.hasTexture())
     {
-        std::vector<unsigned int> indices = object->getIndices();
-        std::vector<QVector3D> vertices = object->getVertices(_model);
-        std::vector<QVector3D> texCoords = object->getTexCoordinates();
+        TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
 
-        unsigned int i1 = indices[ind1];
-        unsigned int i2 = indices[ind1 + 1];
-        unsigned int i3 = indices[ind1 + 2];
+        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, point, _model);
 
-        QVector3D alfas = getBaricentricCoordinates(vertices[i1], vertices[i2], vertices[i3], point);
-        QVector3D texInt = alfas.x() * texCoords[i1] + alfas.y() * texCoords[i2] + alfas.z() * texCoords[i3];
         QImage texture = material.getTexture();
         QColor aux = texture.pixelColor(texInt.x() * texture.width(), texture.height() - (texInt.y() * texture.height()));
         color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
@@ -412,7 +293,7 @@ QColor RayTracing::calculatePhongDiffuse(Object *object, Light light, float lamb
 
 
 
-QColor RayTracing::calculatePhongSpecular(Object *object, Light light, QVector3D point, QVector3D N, int ind1)
+QColor RayTracing::calculatePhongSpecular(Object *object, Light light, QVector3D point, QVector3D N)
 {
     QVector3D L = (light.position - point).normalized();
 
@@ -487,11 +368,6 @@ QImage RayTracing::generateRayTracingImage()
                     unsigned int vertCloser;
                     Object * objectCloser;
                     unsigned int indexObject;
-                    std::vector<unsigned int> indices;
-                    std::vector<QVector3D> vertices;
-                    std::vector<QVector3D> normals;
-
-                    bool isSphere = false;
 
                     for(unsigned int o = 0; o < _objects.size(); o++)
                     {
@@ -504,57 +380,22 @@ QImage RayTracing::generateRayTracingImage()
                             if( t < tCloser && t>0)
                             {
                                 tCloser = t;
-                                ///vertCloser = i;
                                 objectCloser = _objects[o];
                                 indexObject = o;
-                                isSphere = true;
                             }
                         }
                         else
                         {
-                            indices = _objects[o]->getIndices();
-                            vertices = _objects[o]->getVertices(_model);
-                            normals = _objects[o]->getNormals(_model.transposed().inverted());
-
-                            for(unsigned int i = 0; i < indices.size() - 2; i = i + 3)
+                            TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
+                            int indTri;
+                            float t = mesh->intersectsWithRay(cameraPixelRay, _model, tCloser, indTri);
+                            if( t < tCloser && t>0 && indTri >= 0)
                             {
-                                int i1 = indices[i];
-                                int i2 = indices[i+1];
-                                int i3 = indices[i+2];
-
-                                //Vetores formados pelos pontos do triângulo
-                                QVector3D e2 = vertices[i3] - vertices[i2];
-                                QVector3D e3 = vertices[i1] - vertices[i3];
-
-                                //Normal ao triângulo
-                                QVector3D normal = QVector3D::crossProduct(e2, e3).normalized();
-
-                                //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
-                                // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
-
-                                float prodDN = QVector3D::dotProduct(d, normal);
-                                if(prodDN != 0)
-                                {
-                                    //t é a coordenada paramétrica do ponto no raio
-                                    float t = (QVector3D::dotProduct(vertices[i1] - _camera.eye, normal))/prodDN;
-
-                                    //p é o ponto que raio atinge na superfície
-                                    QVector3D p = getRayPoint(t, cameraPixelRay);
-
-                                    //Verificar se ponto que raio atinge intersecta o triângulo
-                                    bool verif = triangleVerification(vertices[i1], vertices[i2], vertices[i3], p);
-
-                                    if(verif && t < tCloser && t>0)
-                                    {
-                                        tCloser = t;
-                                        vertCloser = i;
-                                        objectCloser = _objects[o];
-                                        indexObject = o;
-                                        isSphere = false;
-                                    }
-                                }
-
-                              }
+                                tCloser = t;
+                                objectCloser = _objects[o];
+                                indexObject = o;
+                                vertCloser = indTri;
+                            }
                         }
                     }
 
@@ -564,7 +405,7 @@ QImage RayTracing::generateRayTracingImage()
                     if(tCloser < FLT_MAX)
                     {
                         QVector3D point = getRayPoint(tCloser, cameraPixelRay);
-                        QColor cor =  getColorAt(point, cameraPixelRay, tCloser, objectCloser, indexObject, vertCloser);
+                        QColor cor =  getColorAt(point, cameraPixelRay, objectCloser, indexObject, vertCloser);
                         totalColor = QVector3D(cor.red(), cor.green(), cor.blue());
                     }
                 }

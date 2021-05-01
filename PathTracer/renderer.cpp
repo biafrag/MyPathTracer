@@ -195,7 +195,7 @@ void Renderer::createScene()
         //normals = points;
     }
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
-    t->setMaterial(material);
+    //t->setMaterial(material);
     //_objects.push_back(t);
 }
 

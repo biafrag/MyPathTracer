@@ -29,6 +29,7 @@ Plane::Plane()
     _points = points;
     _indices = indices;
     _normals = normals;
+
 }
 
 
@@ -116,12 +117,6 @@ void Plane::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, c
         _program->bind();
         _vao.bind();
         updateVertexBuffer();
-
-//        _program->setUniformValue("light.position", viewMatrix*QVector3D(5, -5, 5) );
-//        _program->setUniformValue("light.ambient", QVector3D(0.3f, 0.3f, 0.3f));
-//        _program->setUniformValue("light.diffuse", QVector3D(1.0f, 1.0f, 1.0f));
-//        _program->setUniformValue("light.specular", QVector3D(1.0f,  1.0f,1.0f));
-//        _program->setUniformValue("light.shininess", 24.0f);
 
         for (unsigned int i = 0; i < lights.size(); i++)
         {

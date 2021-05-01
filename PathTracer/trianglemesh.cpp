@@ -133,6 +133,183 @@ void TriangleMesh::updateTexBuffer()
 
 
 
+bool TriangleMesh::triangleVerification(unsigned int trianglefirstIndexOfIndice, QVector3D point, QMatrix4x4 m)
+{
+    QVector3D p1 = m * _points[_indices[trianglefirstIndexOfIndice]];
+    QVector3D p2 = m * _points[_indices[trianglefirstIndexOfIndice + 1]];
+    QVector3D p3 = m * _points[_indices[trianglefirstIndexOfIndice + 2]];
+
+    float A1, A2, A3, At;
+    float alfa1, alfa2, alfa3;
+
+    QVector3D normal = QVector3D::crossProduct(p3 - p1, p2 - p1);
+    A1 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p1, p2 - p1))/2.0;
+    A2 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p2, p3 - p2))/2.0;
+    A3 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p3, p1 - p3))/2.0;
+    At = QVector3D::dotProduct(normal, QVector3D::crossProduct(p2 - p3, p1 - p3))/2.0;
+    alfa3 = A1/At;
+    alfa1 = A2/At;
+    alfa2 = A3/At;
+
+    //Para estar dentro as coordenadas baricêntricas precisam estar entre 0 e 1
+    if(alfa1 < 0 || alfa1 > 1 || alfa2 < 0 || alfa2 > 1 || alfa3 < 0 || alfa3 > 1 )
+    {
+        return false;
+    }
+    return true;
+}
+
+
+
+QVector3D TriangleMesh::getTriangleNormal(unsigned int trianglefirstIndexOfIndice, QMatrix4x4 m)
+{
+    int i1 = _indices[trianglefirstIndexOfIndice];
+    int i2 = _indices[trianglefirstIndexOfIndice + 1];
+    int i3 = _indices[trianglefirstIndexOfIndice + 2];
+
+    //Vetores formados pelos pontos do triângulo
+    QVector3D e2 = m * _points[i3] - m * _points[i2];
+    QVector3D e3 = m * _points[i1] - m * _points[i3];
+
+    //Normal ao triângulo
+    return QVector3D::crossProduct(e2, e3).normalized();
+}
+
+
+
+QVector3D TriangleMesh::getTriangleBaricentricCoordinates(unsigned int trianglefirstIndexOfIndice, QVector3D point, QMatrix4x4 m)
+{
+    QVector3D p1 = m * _points[_indices[trianglefirstIndexOfIndice]];
+    QVector3D p2 = m * _points[_indices[trianglefirstIndexOfIndice + 1]];
+    QVector3D p3 = m * _points[_indices[trianglefirstIndexOfIndice + 2]];
+
+    float A1, A2, A3, At;
+    float alfa1, alfa2, alfa3;
+
+    QVector3D normal = QVector3D::crossProduct(p3 - p1, p2 - p1);
+    A1 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p1, p2 - p1))/2.0;
+    A2 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p2, p3 - p2))/2.0;
+    A3 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p3, p1 - p3))/2.0;
+    At = QVector3D::dotProduct(normal, QVector3D::crossProduct(p2 - p3, p1 - p3))/2.0;
+
+    alfa3 = A1/At;
+    alfa1 = A2/At;
+    alfa2 = A3/At;
+
+    return QVector3D(alfa1, alfa2, alfa3);
+}
+
+
+
+QVector3D TriangleMesh::getNormalInsideTriangle(unsigned int trianglefirstIndexOfIndice, QVector3D point, QMatrix4x4 m)
+{
+    unsigned int ind1, ind2, ind3;
+    ind1 = _indices[trianglefirstIndexOfIndice];
+    ind2 = _indices[trianglefirstIndexOfIndice + 1];
+    ind3 = _indices[trianglefirstIndexOfIndice + 2];
+
+    QMatrix4x4 normalMatrix = m.transposed().inverted();
+    QVector3D alfas= getTriangleBaricentricCoordinates(trianglefirstIndexOfIndice, point, m);
+    QVector3D normal = alfas.x() * (normalMatrix *_normals[ind1]) + alfas.y() * (normalMatrix * _normals[ind2]) + alfas.z() * (normalMatrix * _normals[ind3]);
+    return normal;
+}
+
+
+
+QVector3D TriangleMesh::getTexCoordinatesInsideTriangle(unsigned int trianglefirstIndexOfIndice, QVector3D point, QMatrix4x4 m)
+{
+    QVector3D texInt;
+    if(_material.hasTexture())
+    {
+        unsigned int i1 = _indices[trianglefirstIndexOfIndice];
+        unsigned int i2 = _indices[trianglefirstIndexOfIndice + 1];
+        unsigned int i3 = _indices[trianglefirstIndexOfIndice + 2];
+
+        QVector3D alfas= getTriangleBaricentricCoordinates(trianglefirstIndexOfIndice, point, m);
+
+        texInt = alfas.x() * _texCoords[i1] + alfas.y() * _texCoords[i2] + alfas.z() * _texCoords[i3];
+    }
+    return texInt;
+}
+
+
+
+int TriangleMesh::intersectsWithRay(Ray ray, QMatrix4x4 m, float tCloser, int &firstIndTri)
+{
+    firstIndTri = -1;
+    for(unsigned int i = 0; i < _indices.size() - 2; i = i + 3)
+    {
+        int i1 = _indices[i];
+
+        //Normal ao triângulo
+        QVector3D normal = getTriangleNormal(i, m);
+
+        //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
+        // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
+
+        float prodDN = QVector3D::dotProduct(ray.direction, normal);
+        if(prodDN != 0)
+        {
+            //t é a coordenada paramétrica do ponto no raio
+            float t = (QVector3D::dotProduct(m * _points[i1] - ray.origin, normal))/prodDN;
+
+            //p é o ponto que raio atinge na superfície
+            QVector3D p = ray.hit(t);
+
+            //Verificar se ponto que raio atinge intersecta o triângulo
+            bool verif = triangleVerification(i, p, m);
+
+            if(verif && t < tCloser && t>0)
+            {
+                tCloser = t;
+                firstIndTri = i;
+            }
+        }
+
+    }
+    return tCloser;
+}
+
+
+
+bool TriangleMesh::isRayIntersecting(Ray ray, QMatrix4x4 m)
+{
+    for(unsigned int i = 0; i < _indices.size() - 2; i = i + 3)
+    {
+        int i1 = _indices[i];
+
+        //Normal ao triângulo
+        QVector3D normal = getTriangleNormal(i, m);
+
+        //Produto interno entre vetor do raio e a normal não pode ser 0 senão quer dizer que eles são perpendiculares
+        // Ou seja, a superfície e o raio são paralelos então o raio nunca atinge aquele lugar da superfície
+
+        float prodDN = QVector3D::dotProduct(ray.direction, normal);
+        if(prodDN != 0)
+        {
+            //t é a coordenada paramétrica do ponto no raio
+            float t = (QVector3D::dotProduct(m * _points[i1] - ray.origin, normal))/prodDN;
+
+            if(t > 0)
+            {
+                //p é o ponto que raio atinge na superfície
+                QVector3D p = ray.hit(t);
+
+                //Verificar se ponto que raio atinge intersecta o triângulo
+                bool verif = triangleVerification(i, p, m);
+
+                if(verif)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+
 void TriangleMesh::createVAO()
 {
     _vao.create();

@@ -7,4 +7,9 @@ struct Ray
     QVector3D energy = {1, 1, 1};
     QVector3D origin;
     QVector3D direction;
+
+    QVector3D hit(float t)
+    {
+        return (origin + (t * direction));
+    }
 };

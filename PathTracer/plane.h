@@ -1,9 +1,8 @@
 #pragma once
-#include "object.h"
 #include <QOpenGLVertexArrayObject>
+#include "trianglemesh.h"
 
-
-class Plane : public Object
+class Plane : public TriangleMesh
 {
 public:
     Plane();
