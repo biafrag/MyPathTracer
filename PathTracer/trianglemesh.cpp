@@ -8,6 +8,7 @@ std::vector<QVector3D> &normals)
     _points = points;
     _indices = indices;
     _normals = normals;
+    normalizeNormals();
 }
 
 
@@ -287,10 +288,11 @@ bool TriangleMesh::isRayIntersecting(Ray ray, QMatrix4x4 m)
         float prodDN = QVector3D::dotProduct(ray.direction, normal);
         if(prodDN != 0)
         {
+            QVector3D pointWorld = m * _points[i1];
             //t é a coordenada paramétrica do ponto no raio
-            float t = (QVector3D::dotProduct(m * _points[i1] - ray.origin, normal))/prodDN;
+            float t = (QVector3D::dotProduct(pointWorld - ray.origin, normal))/prodDN;
 
-            if(t > 0)
+            if(t > 0 && t < 1)
             {
                 //p é o ponto que raio atinge na superfície
                 QVector3D p = ray.hit(t);
@@ -306,6 +308,43 @@ bool TriangleMesh::isRayIntersecting(Ray ray, QMatrix4x4 m)
         }
     }
     return false;
+}
+
+
+
+void TriangleMesh::computeNormals()
+{
+    _normals.resize(_points.size(), QVector3D(0, 0, 0));
+    for (unsigned int t = 0; t < _indices.size() / 3; t++)
+    {
+       //get the triangle vertices
+       unsigned int v0 = _indices[3 * t + 0];
+       unsigned int v1 = _indices[3 * t + 1];
+       unsigned int v2 = _indices[3 * t + 2];
+       const QVector3D &p0 = _points[v0];
+       const QVector3D &p1 = _points[v1];
+       const QVector3D &p2 = _points[v2];
+       QVector3D n = QVector3D::crossProduct(p2 - p0, p1 - p0);
+       _normals[v0] += n;
+       _normals[v1] += n;
+       _normals[v2] += n;
+    }
+    //Normalize each normal
+    for (auto &normal : _normals)
+    {
+       normal = normal.normalized();
+    }
+}
+
+
+
+void TriangleMesh::normalizeNormals()
+{
+    for (auto &normal : _normals)
+    {
+       normal = normal.normalized();
+    }
+
 }
 
 

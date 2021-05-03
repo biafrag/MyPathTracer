@@ -13,3 +13,14 @@ struct Ray
         return (origin + (t * direction));
     }
 };
+
+
+
+struct RayHit
+{
+    QVector3D position;
+    float t;
+    QVector3D normal;
+};
+
+

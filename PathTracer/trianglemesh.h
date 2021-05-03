@@ -28,6 +28,8 @@ public:
     //Recebe raio e vê se raio intersecta algum triângulo da malha
     int intersectsWithRay(Ray ray, QMatrix4x4 m, float tCloser, int &firstIndTri);
     bool isRayIntersecting(Ray ray, QMatrix4x4 m);
+    void computeNormals();
+    void normalizeNormals();
 private:
 
     QOpenGLVertexArrayObject _vao;

@@ -29,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     ObjectType.h \
+    intersectionrecord.h \
     light.h \
     mainwindow.h \
     material.h \

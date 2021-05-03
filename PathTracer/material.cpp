@@ -107,7 +107,7 @@ void Material::setTexture(QImage texture)
  Material Material::Gold()
 {
     //return Material("Gold", QVector3D(0, 0, 0), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0, false);
-     return Material("Gold", QVector3D(1, 0.88, 0.43), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0, false);
+     return Material("Gold", QVector3D(1, 0.88, 0.43), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0.6, false);
 
 }
 
@@ -115,5 +115,13 @@ void Material::setTexture(QImage texture)
 
  Material Material::Rubber()
 {
-    return Material("Rubber", QVector3D(0.4, 0, 0), QVector3D(0.7, 0.04, 0.04), 10, 1);
-}
+     return Material("Rubber", QVector3D(0.4, 0, 0), QVector3D(1, 1, 1), 60, 1, false);
+ }
+
+
+
+ Material Material::Mirror()
+ {
+     return Material("Mirror", QVector3D(0, 0, 0), QVector3D(1, 1, 1), 60, 0, false);
+
+ }

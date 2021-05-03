@@ -18,7 +18,7 @@ Renderer::Renderer(QWidget *parent)
     _camera.zFar  = 1000.f;
     _camera.fov  = 60.f;
 
-    _light.position = {-50, 50, 50};
+    _light.position = {-10, 50, 50};
     _light.ambient = {0.3f, 0.3f, 0.3f};
     _light.diffuse = {1.0f, 1.0f, 1.0f};
     _light.specular = {0.3f,  0.3f, 0.3f};
@@ -32,7 +32,7 @@ Renderer::Renderer(QWidget *parent)
     light2.shi = 60.0f;
 
     Light light3;
-    light3.position = {50, -50, -50};
+    light3.position = {150, -150, -150};
     light3.ambient = {0.3f, 0.3f, 0.3f};
     light3.diffuse = {0.8f, 0.8f, 0.8f};
     light3.specular = {0.3f, 0.3f, 0.3f};
@@ -58,7 +58,7 @@ QImage Renderer::getRayTracedImage(float &time)
     QImage image = r.generateRayTracingImage();
 
     time = r.getTime();
-    return r.generateRayTracingImage();
+    return image;
 
 }
 
@@ -67,20 +67,23 @@ QImage Renderer::getRayTracedImage(float &time)
 void Renderer::createScene()
 {
     QMatrix4x4 rot, trans, scale;
-    scale.scale(QVector3D(5, 5, 5));
+    scale.scale(QVector3D(100, 100, 100));
     rot.rotate(90, QVector3D(1, 0 , 0));
-    trans.translate(QVector3D(0, -1, 0));
-    Plane *p =  new Plane(trans, rot, scale);
+    trans.translate(QVector3D(0, -100, 0));
+    Plane *frontScenePlane=  new Plane(trans, rot, scale);
     Material material;
     material.setAlbedo(QVector3D(1, 1, 0));
-    p->setMaterial(material);
-    p->setTexture(":/textures/Texturas/Ground.jpg");
-    //_objects.push_back(p);
+    //frontScenePlane->setMaterial(Material::Rubber());
+    frontScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
+
+    _objects.push_back(frontScenePlane);
     material.setAlbedo(QVector3D(0.5, 0, 0));
     //material.color = QVector3D(1, 1, 1);
 
     Sphere *s =  new Sphere(QVector3D(0, 0, 1));
-    s->setMaterial(Material::Gold());
+    //s->setMaterial(Material::Gold());
+    s->setMaterial(material);
+
     _objects.push_back(s);
 
     material.setAlbedo( QVector3D(1, 0.3, 0.7));
@@ -99,50 +102,51 @@ void Renderer::createScene()
     _objects.push_back(s4);
 
     rot.setToIdentity();
-    rot.rotate(90, QVector3D(1, 0 , 0));
+    rot.rotate(-90, QVector3D(1, 0 , 0));
     trans.setToIdentity();
     trans.translate(QVector3D(0, 100, 0));
     scale.setToIdentity();
     scale.scale(QVector3D(100, 100, 100));
 
 
-    Plane *p2 =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(1,0.5,0.1));
-    p2->setMaterial(material);
+    Plane *backScenePlane =  new Plane(trans, rot, scale);
+    material.setAlbedo(QVector3D(1, 1, 0));
+    //backScenePlane->setMaterial(Material::Rubber());
+    backScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    p2->setTexture(":/textures/Texturas/Ceu2.jpg");
-    //_objects.push_back(p2);
+    _objects.push_back(backScenePlane);
 
     rot.setToIdentity();
-    rot.rotate(90, QVector3D(0, 0 , 1));
+    rot.rotate(-90, QVector3D(0, 1 , 0));
+    rot.rotate(-90, QVector3D(0, 0 , 1));
+    rot.rotate(90, QVector3D(1, 0 , 0));
+
     trans.setToIdentity();
     trans.translate(QVector3D(0, 0, 0));
     scale.setToIdentity();
     scale.scale(QVector3D(5, 5, 5));
 
-    Plane *p3 =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(0.4,0.8,0.5));
-   // material.isReflective = true;
-    p3->setMaterial(material);
-    //p3->setTexture(":/textures/Texturas/Ceu2.jpg");
-    p3->setTexture(":/textures/Texturas/Ground.jpg");
+    Plane *groundPlane =  new Plane(trans, rot, scale);
+    material.setAlbedo(QVector3D(1, 1, 0));
+    groundPlane->setMaterial(Material::Mirror());
+    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
+    //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(p3);
+    _objects.push_back(groundPlane);
 
     rot.setToIdentity();
-    rot.rotate(90, QVector3D(0, 1 , 0));
+    rot.rotate(-90, QVector3D(0, 1 , 0));
     trans.setToIdentity();
     trans.translate(QVector3D(-100, 0, 0));
     scale.setToIdentity();
     scale.scale(QVector3D(100, 100, 100));
 
-    Plane *p4 =  new Plane(trans, rot, scale);
-    material.setAlbedo( QVector3D(0.4,0.8,0.5));
-   // material.isReflective = true;
-    p4->setMaterial(material);
-    p4->setTexture(":/textures/Texturas/Ceu2.jpg");
+    Plane *leftScenePlane =  new Plane(trans, rot, scale);
+    material.setAlbedo(QVector3D(1, 1, 0));
+    //leftScenePlane->setMaterial(Material::Rubber());
+    leftScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(p4);
+    _objects.push_back(leftScenePlane);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -151,14 +155,12 @@ void Renderer::createScene()
     scale.setToIdentity();
     scale.scale(QVector3D(100, 100, 100));
 
-    Plane *p5 =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(0.4,0.8,0.5));
-   // material.isReflective = true;
-    p5->setMaterial(material);
-    p5->setTexture(":/textures/Texturas/Ceu2.jpg");
+    Plane *rightScenePlane =  new Plane(trans, rot, scale);
+    material.setAlbedo(QVector3D(1, 1, 0));
+    //rightScenePlane->setMaterial(Material::Rubber());
+    rightScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-
-    //_objects.push_back(p5);
+    _objects.push_back(rightScenePlane);
 
 
     rot.setToIdentity();
@@ -168,12 +170,12 @@ void Renderer::createScene()
     scale.setToIdentity();
     scale.scale(QVector3D(100, 100, 100));
 
-    Plane *p6 =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(0.4,0.8,0.5));
-   // material.isReflective = true;
-    p6->setMaterial(material);
-    p6->setTexture(":/textures/Texturas/Ceu2.jpg");
-    //_objects.push_back(p6);
+    Plane *upScenePlane =  new Plane(trans, rot, scale);
+    material.setAlbedo(QVector3D(1, 1, 0));
+    //upScenePlane->setMaterial(Material::Rubber());
+    upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
+
+    _objects.push_back(upScenePlane);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;
@@ -189,14 +191,17 @@ void Renderer::createScene()
      //material.isReflective = true;
      //material.color = QVector3D(0.5,0.5,0.5);
 
-    readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+    readFile("../PathTracer/Malhas/Thetrahedron.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+
+    TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
+
     if(normals.size() == 0)
     {
-        //normals = points;
+        t->computeNormals();
     }
-    TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
-    //t->setMaterial(material);
-    //_objects.push_back(t);
+    material = Material::Gold();
+    t->setMaterial(material);
+   //_objects.push_back(t);
 }
 
 

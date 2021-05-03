@@ -37,7 +37,7 @@ Plane::Plane()
 Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 {
     _type = ObjectType::PLANE;
-    std::vector<QVector3D> points, normals;
+    std::vector<QVector3D> points, normals, texCoords;
     std::vector<unsigned int> indices;
     points = {{-1,1,0}, {1,1,0},
                {-1,-1,0}, {1,-1,0}};
@@ -49,20 +49,36 @@ Plane::Plane(QMatrix4x4 translation, QMatrix4x4 rotation, QMatrix4x4 scale)
 
     QMatrix4x4 planeModel = translation * rotation * scale;
 
-    _texCoords = {{0, 1, 0}, {1, 1, 0},
+    texCoords = {{0, 1, 0}, {1, 1, 0},
                  {0, 0, 0}, {1, 0, 0}};
     for(unsigned int i = 0; i < points.size(); i++)
     {
 
         points[i] = planeModel * points[i];
-        normals[i] = /*planeModel.inverted().transposed() **/ normals[i];
     }
 
     indices = {0, 2, 1, 1, 2, 3};
 
     _points = points;
     _indices = indices;
-    _normals = normals;
+    computeNormals();
+
+    for(unsigned int i = 0; i < _points.size(); i++)
+    {
+//        float u, v;
+//        QVector3D e1 = QVector3D(_normals[i].y(), - _normals[i].x(), 0).normalized();
+//        QVector3D e2 = QVector3D::crossProduct(_normals[i], e1).normalized();
+
+//        u = QVector3D::dotProduct(e1, _points[i]);
+//        v = QVector3D::dotProduct(e2, _points[i]);
+//        _texCoords.push_back(QVector3D(u, v, 0));
+
+        //_texCoords[i] = planeModel * _texCoords[i];
+        _texCoords.push_back(planeModel * texCoords[i]);
+
+    }
+    _texCoords = texCoords;
+
 
 }
 

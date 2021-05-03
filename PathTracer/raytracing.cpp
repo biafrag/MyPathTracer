@@ -14,12 +14,13 @@ RayTracing::RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
                        std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor)
 
     : _model(model),
+      _backgroundColor(backgroundColor),
       _camera(cam),
       _objects(objects),
       _lights(lights),
-      _backgroundColor(backgroundColor),
       _width(w),
       _height(h)
+
 {
     _Ze = (_camera.eye - cam.center).normalized();
     _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
@@ -71,21 +72,22 @@ bool RayTracing::triangleVerification(QVector3D p1, QVector3D p2, QVector3D p3, 
 
 
 
-bool RayTracing::hasObjectObstacle(Light light, QVector3D point, unsigned int index)
+bool RayTracing::hasObjectObstacle(Light light, IntersectRecord intersection)
 {
+    RayHit hit = intersection.hit;
     Ray pointLightRay;
-    pointLightRay.origin = point;
-    pointLightRay.direction = (light.position - point).normalized();
+    pointLightRay.origin = hit.position;
+    pointLightRay.direction = (light.position - hit.position).normalized();
     for(unsigned int o = 0; o < _objects.size(); o++)
     {
-        if(o != index)
+        if(_objects[o] != intersection.object)
         {
             ObjectType type = _objects[o]->getObjectType();
             if(type == ObjectType::SPHERE)
             {
                 Sphere *s = dynamic_cast<Sphere *>(_objects[o]);
                 float t = s->intersectsWith(pointLightRay, _model);
-                if(t > 0)
+                if(t > 0 && t < 1)
                 {
                     return true;
                 }
@@ -138,7 +140,7 @@ Object * RayTracing::reflection(Ray ray, float &tCloser, unsigned int &indexObje
                 TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
                 int indTri;
                 float t = mesh->intersectsWithRay(ray, _model, tCloser, indTri);
-                if( t < tCloser && t>0 && indTri >= 0)
+                if( t < tAux && t>0 && indTri >= 0 )
                 {
                     tAux = t;
                     objectCloser = _objects[o];
@@ -160,10 +162,11 @@ QVector3D RayTracing::getRayPoint(float t, Ray ray)
 }
 
 
-QColor RayTracing::getColorAt(QVector3D point, Ray ray, Object *object, int indObj, int indVert)
+QVector3D RayTracing::getColorAt(IntersectRecord intersection, Ray ray, int indObj, int indVert)
 {
-    QColor corF = QColor(_backgroundColor.x() * 255, _backgroundColor.y() * 255, _backgroundColor.z() * 255);
-
+    RayHit hit = intersection.hit;
+    QVector3D corF = _backgroundColor;
+    Object *object = intersection.object;
     Material material = object->getMaterial();
 
     if(ray.timesReflection < 0)
@@ -175,6 +178,74 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, Object *object, int indO
         QVector3D N;
         if(object->getObjectType() == ObjectType::SPHERE)
         {
+            N = dynamic_cast<Sphere*>(object)->normalAt(hit.position);
+        }
+        else
+        {
+             TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
+             N = mesh->getNormalInsideTriangle(indVert, hit.position, _model);
+        }
+        intersection.hit.normal = N;
+
+
+        if(material.getReflectivity() < 1.0)
+        {
+            Ray reflection_ray ;
+            reflection_ray.origin = hit.position;
+            reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
+            Object * objRef;
+            RayHit newHit;
+            IntersectRecord newIntersection;
+
+            unsigned int indObjRef, indVertRef;
+            objRef = reflection(reflection_ray, newHit.t, indObjRef, indVertRef, indObj);
+            newHit.position = hit.position + reflection_ray.direction * newHit.t;
+
+            if(objRef != nullptr)
+            {
+                newIntersection.hit = newHit;
+                newIntersection.object = objRef;
+                reflection_ray.timesReflection = ray.timesReflection - 1;
+                reflection_ray.energy = ray.energy * material.getSpecular();
+                QVector3D cor = getColorAt(newIntersection, reflection_ray, indObjRef, indVertRef) ;
+                corF += cor;
+
+            }
+
+        }
+        bool hasNoEffect = hasObjectObstacle(light, intersection);
+        if(!hasNoEffect || material.getReflectivity() < 1 )
+        {
+            QVector3D diffuse = calculatePhongDiffuse(intersection, light, indVert); //Adicionar propriedade dos materiais do objeto depois
+            QVector3D specular = calculatePhongSpecular(intersection, light);
+            QVector3D ambient = calculateAmbient(intersection, light, indVert);
+
+            QVector3D cor = ambient + diffuse + specular;
+            //cor = {1, 0, 0};
+            corF = (1 - material.getReflectivity()) * corF + cor  * material.getReflectivity() ;
+        }
+        else
+        {
+            QVector3D ambient = calculateAmbient(intersection, light, indVert);
+            corF = material.getReflectivity() * ambient;
+        }
+    }
+    return corF;
+}
+
+
+
+QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int indObj, float t, int indVert)
+{
+    if(t < FLT_MAX)
+    {
+        QVector3D specular = QVector3D(1.0f, 0.78f, 0.34f);
+
+        QVector3D N;
+        point = ray.hit(t);
+
+        if(object->getObjectType() == ObjectType::SPHERE)
+        {
             N = dynamic_cast<Sphere*>(object)->normalAt(point);
         }
         else
@@ -183,71 +254,37 @@ QColor RayTracing::getColorAt(QVector3D point, Ray ray, Object *object, int indO
              N = mesh->getNormalInsideTriangle(indVert, point, _model);
         }
 
-        if(material.getReflectivity() < 1.0)
-        {
-            Ray reflection_ray ;
-            reflection_ray.origin = point;
-            reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
+        ray.origin = point + N * 0.001f;
+        //v = i - 2 * n * dot(i n) .
+        ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
+        ray.energy *= specular;
 
-            float tRef;
-            Object * objRef;
-            unsigned int indObjRef, indVertRef;
-            objRef = reflection(reflection_ray, tRef, indObjRef, indVertRef, indObj);
-            QVector3D reflection_intersection_position = point + reflection_ray.direction * tRef;
+        return QVector3D(0.0f, 0.0f, 0.0f);
+    }
+    else
+    {
+        ray.energy = QVector3D(0.0f, 0.0f, 0.0f);
 
-            if(objRef != nullptr)
-            {
-                reflection_ray.timesReflection = ray.timesReflection - 1;
-                reflection_ray.energy = ray.energy * material.getSpecular();
-
-                QColor cor = getColorAt(reflection_intersection_position, reflection_ray, objRef, indObjRef, indVertRef) ;
-                corF = QColor(std::fmin(corF.red() + cor.red(), 255), std::fmin(corF.green() + cor.green(), 255), std::fmin(corF.blue() + cor.blue(), 255));
-            }
-
-        }
-        bool hasNoEffect = hasObjectObstacle(light, point, indObj);
-        if(!hasNoEffect)
-        {
-            //Normal naquele ponto específico. Fazemos como se fosse uma média entre as normais do triângulo usando as coordenadas baricêntricas
-            QVector3D L = (light.position - point).normalized();
-
-            float lambertian = QVector3D::dotProduct(L, N);
-            QColor specular(0, 0, 0);
-            QColor diffuse(0, 0, 0);
-            if(lambertian > 0)
-            {
-                diffuse = calculatePhongDiffuse(object, light, lambertian, point, indVert); //Adicionar propriedade dos materiais do objeto depois
-                specular = calculatePhongSpecular(object, light, point, N);
-            }
-            //QColor ambient = calculateAmbient(object, light, point, indVert);
-            QColor ambient = QColor(0, 0, 0);
-
-            ambient = calculateAmbient(object, light, point, indVert);
-
-            QColor cor(std::fmin(255, diffuse.red() + ambient.red() + specular.red()), std::fmin(255, diffuse.green() + specular.green() + ambient.green()), std::fmin(255, diffuse.blue() + specular.blue() + ambient.blue()));
-
-            corF = QColor(std::fmin((1 - material.getReflectivity()) * corF.red() + cor.red()  * material.getReflectivity() , 255), std::fmin((1 - material.getReflectivity()) * corF.green() + cor.green() * material.getReflectivity(), 255), std::fmin((1 - material.getReflectivity())  * corF.blue() + cor.blue() * material.getReflectivity(), 255));
-
-        }
-        else
-        {
-            QColor ambient = calculateAmbient(object, light, point, indVert);
-            corF = QColor(std::fmin(ambient.red(), 255), std::fmin(ambient.green(), 255), std::fmin(ambient.blue(), 255));
-        }
+        return _backgroundColor;
     }
 
-    return corF;
+    //return (N * 0.5f) + QVector3D(0.5, 0.5, 0.5);
 }
 
-QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point, int ind1)
+
+
+QVector3D RayTracing::calculateAmbient(IntersectRecord intersection, Light light, int ind1)
 {
-    Material material = object->getMaterial();
-    QVector3D color;
+    Object *object = intersection.object;
+    Material material = intersection.object->getMaterial();
+    RayHit hit = intersection.hit;
+
+    QVector3D color(0, 0, 0);
     if(material.hasTexture())
     {
         TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
 
-        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, point, _model);
+        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, hit.position, _model);
 
         QImage texture = material.getTexture();
         QColor aux = texture.pixelColor(texInt.x() * texture.width(), (texInt.y() * texture.height()));
@@ -258,64 +295,75 @@ QColor RayTracing::calculateAmbient(Object *object, Light light, QVector3D point
         color = material.getAlbedo();
     }
     QVector3D corVec = light.ambient * color;
-    QColor cor = QColor(std::fmin(corVec.x() * 255, 255), std::fmin(corVec.y() * 255, 255), std::fmin(corVec.z() * 255, 255));
 
-    return cor;
+    return corVec;
 }
 
 
 
-QColor RayTracing::calculatePhongDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 )
+QVector3D RayTracing::calculatePhongDiffuse(IntersectRecord intersection, Light light, int ind1 )
 {
-   Material material = object->getMaterial();
+   Object *object = intersection.object;
+   Material material = intersection.object->getMaterial();
+   RayHit hit = intersection.hit;
 
-    QVector3D color;
-    if(material.hasTexture())
+   QVector3D L = (light.position - hit.position).normalized();
+
+   float lambertian = QVector3D::dotProduct(L, hit.normal);
+    QVector3D color(0, 0, 0);
+    if(lambertian > 0)
     {
-        TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
+        if(material.hasTexture())
+        {
+            TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
 
-        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, point, _model);
+            QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, hit.position, _model);
 
-        QImage texture = material.getTexture();
-        QColor aux = texture.pixelColor(texInt.x() * texture.width(), texture.height() - (texInt.y() * texture.height()));
-        color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
+            QImage texture = material.getTexture();
+            QColor aux = texture.pixelColor(texInt.x() * texture.width(), texture.height() - (texInt.y() * texture.height()));
+            color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
+        }
+        else
+        {
+            color = material.getAlbedo();
+        }
+
     }
-    else
-    {
-        color = material.getAlbedo();
-    }
-
     QVector3D corVec = lambertian * light.diffuse * color;
-    QColor cor = QColor(std::fmin(corVec.x() * 255, 255), std::fmin(corVec.y() * 255, 255), std::fmin(corVec.z() * 255, 255));
 
-    return cor;
+    return corVec;
 }
 
 
 
-QColor RayTracing::calculatePhongSpecular(Object *object, Light light, QVector3D point, QVector3D N)
+QVector3D RayTracing::calculatePhongSpecular(IntersectRecord intersection, Light light)
 {
-    QVector3D L = (light.position - point).normalized();
+    RayHit hit = intersection.hit;
+    Object *object = intersection.object;
+    QVector3D L = (light.position - hit.position).normalized();
 
-    QVector3D V = (_camera.eye - point).normalized();
+    QVector3D V = (_camera.eye - hit.position).normalized();
     QVector3D H = (L+V).normalized();
-    float dotP = QVector3D::dotProduct(N,H);
+    float dotP = QVector3D::dotProduct(hit.normal, H);
     float ispec;
     Material material = object->getMaterial();
 
-    if(dotP > 0)
-    {
-        ispec = std::pow(dotP, material.getShi());
-    }
-    else
-    {
-        ispec = 0;
-    }
-    QVector3D specular = material.getSpecular() * light.specular * ispec;
+    float lambertian = QVector3D::dotProduct(L, hit.normal);
+     QVector3D specular(0, 0, 0);
+     if(lambertian > 0)
+     {
+         if(dotP > 0)
+         {
+             ispec = std::pow(dotP, material.getShi());
+         }
+         else
+         {
+             ispec = 0;
+         }
+         specular = material.getSpecular() * light.specular * ispec;
+     }
 
-    QColor cor = QColor(std::fmin(specular.x() * 255, 255), std::fmin(specular.y() * 255, 255), std::fmin(specular.z() * 255, 255));
-
-    return cor;
+    return specular;
 }
 
 
@@ -369,6 +417,7 @@ QImage RayTracing::generateRayTracingImage()
                     Object * objectCloser;
                     unsigned int indexObject;
 
+
                     for(unsigned int o = 0; o < _objects.size(); o++)
                     {
                         ObjectType type = _objects[o]->getObjectType();
@@ -404,15 +453,136 @@ QImage RayTracing::generateRayTracingImage()
                     //Se o t que eu encontrei tiver intersectado algum objeto
                     if(tCloser < FLT_MAX)
                     {
+
                         QVector3D point = getRayPoint(tCloser, cameraPixelRay);
-                        QColor cor =  getColorAt(point, cameraPixelRay, objectCloser, indexObject, vertCloser);
-                        totalColor = QVector3D(cor.red(), cor.green(), cor.blue());
+
+                        RayHit hit;
+                        hit.t = tCloser;
+                        hit.position = point;
+                        IntersectRecord intersection;
+                        intersection.hit = hit;
+                        intersection.object = objectCloser;
+                        QVector3D cor =  getColorAt(intersection, cameraPixelRay, indexObject, vertCloser);
+                        totalColor = totalColor + cor;
+
+                    }
+                    else
+                    {
+                        totalColor = _backgroundColor;
                     }
                 }
             }
 
-            //QColor finalColor = totalColor/aadepth*aadepth;
-            image.setPixelColor(x, y, QColor(std::fmin(totalColor.x()/(aadepth*aadepth), 255), std::fmin(totalColor.y()/(aadepth*aadepth), 255), std::fmin(totalColor.z()/(aadepth*aadepth), 255)));
+            QVector3D finalColor = totalColor/aadepth*aadepth;
+            image.setPixelColor(x, y, QColor(std::fmin(finalColor.x() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.y() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.z() * 255/(aadepth*aadepth), 255)));
+        }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    _time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+    std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
+    return image;
+}
+
+
+
+QImage RayTracing::generateRayTracingImage2()
+{
+    QImage image(_width, _height, QImage::Format_RGB32);
+
+    //a é a altura real
+    float a = 2 * _camera.zNear * tan(_camera.fov* (M_PI/180)/2.0);
+
+    //b é a largura real
+    float b = (a * _width)/_height;
+
+    unsigned int aadepth = 1;
+
+    //Passada do JFA
+    auto start  = std::chrono::high_resolution_clock::now();
+
+    #pragma omp parallel for
+    for(int y = 0; y < _height; y++)
+    {
+        for(int x=0; x < _width; x++)
+        {
+            QVector3D totalColor = QVector3D(0, 0, 0);
+            for (unsigned int aax = 0; aax < aadepth; aax++)
+            {
+                for (unsigned int aay = 0; aay < aadepth; aay++)
+                {
+                    //Lance um raio
+                     Ray cameraPixelRay;
+                     cameraPixelRay.origin = _camera.eye;
+
+                     float factor = (float)aax/((float)aadepth);
+                     if(aadepth == 1)
+                     {
+                         factor = 0;
+                     }
+                     else
+                     {
+                         factor = (float)aax/((float)aadepth - 1);
+                     }
+                     //d é um vetor que vai do olho até a tela
+                     QVector3D d = (- _camera.zNear * _Ze) + (a*((((_height-y) + factor)/(float)_height) - 0.5) * _Ye) + b * ((((float)x + factor)/(float)_width) - 0.5) * _Xe;
+
+                    cameraPixelRay.direction = d;
+
+                    //Variável que vai guardar qual é o menor t, ou seja, qual o ponto mais a frente que o raio atinge
+                    float tCloser = FLT_MAX;
+                    unsigned int vertCloser;
+                    Object * objectCloser;
+                    unsigned int indexObject;
+
+
+                    for(unsigned int o = 0; o < _objects.size(); o++)
+                    {
+                        ObjectType type = _objects[o]->getObjectType();
+                        if(type == ObjectType::SPHERE)
+                        {
+                            Sphere *s = dynamic_cast<Sphere *>(_objects[o]);
+                            float t = s->intersectsWith(cameraPixelRay, _model);
+
+                            if( t < tCloser && t>0)
+                            {
+                                tCloser = t;
+                                objectCloser = _objects[o];
+                                indexObject = o;
+                            }
+                        }
+                        else
+                        {
+                            TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
+                            int indTri;
+                            float t = mesh->intersectsWithRay(cameraPixelRay, _model, tCloser, indTri);
+                            if( t < tCloser && t>0 && indTri >= 0)
+                            {
+                                tCloser = t;
+                                objectCloser = _objects[o];
+                                indexObject = o;
+                                vertCloser = indTri;
+                            }
+                        }
+                    }
+
+                    QVector3D point = getRayPoint(tCloser, cameraPixelRay);
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        QVector3D energy = cameraPixelRay.energy;
+                        QVector3D cor = getColorAt2(point, cameraPixelRay, objectCloser, indexObject,tCloser, vertCloser);
+                        totalColor =  totalColor + energy * cor;
+                        if(cameraPixelRay.energy.x() <= 0.01 && cameraPixelRay.energy.y() <= 0.01 && cameraPixelRay.energy.z() <= 0.01)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            QVector3D finalColor = totalColor/aadepth*aadepth;
+            image.setPixelColor(x, y, QColor(std::fmin(finalColor.x() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.y() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.z() * 255/(aadepth*aadepth), 255)));
         }
     }
 

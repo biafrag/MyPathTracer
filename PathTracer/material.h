@@ -29,6 +29,8 @@ public:
 
     static Material Gold();
     static Material Rubber();
+    static Material Mirror();
+
 
 
 private:
