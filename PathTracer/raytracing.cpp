@@ -268,9 +268,11 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
         intersection.hit = hit;
         intersection.object = object;
         bool hasNoEffect = hasObjectObstacle(_lights[0], intersection);
+        QVector3D ambient = calculateAmbient(intersection, _lights[0], indVert);
+
         if(hasNoEffect)
         {
-            return QVector3D(0, 0, 0);
+            return ambient;
         }
 
         //return QVector3D(0.5, 0.6, 0.3) ;
@@ -280,7 +282,6 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
         //return QVector3D::dotProduct(hit.normal, _lights[0].position) /** _lights[0].diffuse*/ * albedo /*+ _lights[0].ambient * albedo*/;
         QVector3D diffuse = calculatePhongDiffuse(intersection, _lights[0], indVert); //Adicionar propriedade dos materiais do objeto depois
         specular = calculatePhongSpecular(intersection, _lights[0]);
-        QVector3D ambient = calculateAmbient(intersection, _lights[0], indVert);
         return diffuse + ambient + specular;
 
     }
@@ -288,7 +289,7 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
     {
         ray.energy = QVector3D(0.0f, 0.0f, 0.0f);
 
-        return _backgroundColor * _lights[0].diffuse + _backgroundColor * _lights[0].ambient + _backgroundColor * _lights[0].specular;
+        return _backgroundColor;
     }
 
     //return (N * 0.5f) + QVector3D(0.5, 0.5, 0.5);
@@ -383,7 +384,7 @@ QVector3D RayTracing::calculatePhongSpecular(IntersectRecord intersection, Light
          {
              ispec = 0;
          }
-         specular = material.getSpecular() * light.specular * ispec;
+         specular = /*material.getSpecular() * */light.specular * ispec;
      }
 
     return specular;

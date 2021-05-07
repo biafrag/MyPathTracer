@@ -83,13 +83,13 @@ void Renderer::createScene()
     //frontScenePlane->setMaterial(Material::Rubber());
     frontScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(frontScenePlane);
+    _objects.push_back(frontScenePlane);
     material.setAlbedo(QVector3D(0.5, 0, 0));
     //material.color = QVector3D(1, 1, 1);
 
     Sphere *s =  new Sphere(QVector3D(0, 0, 1));
-    //s->setMaterial(Material::Gold());
-    s->setMaterial(material);
+    s->setMaterial(Material::Gold());
+    //s->setMaterial(material);
 
     _objects.push_back(s);
 
@@ -101,7 +101,7 @@ void Renderer::createScene()
 
 
     Sphere *s3 =  new Sphere(QVector3D(3, 1, 0.5), 0.5);
-    s3->setMaterial(Material::Rubber());
+    s3->setMaterial(material);
     _objects.push_back(s3);
 
     Sphere *s4 =  new Sphere(QVector3D(0, -3, 0.5), 0.5);
@@ -121,7 +121,7 @@ void Renderer::createScene()
     //backScenePlane->setMaterial(Material::Rubber());
     backScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(backScenePlane);
+    _objects.push_back(backScenePlane);
 
     rot.setToIdentity();
     rot.rotate(-90, QVector3D(0, 1 , 0));
@@ -135,8 +135,8 @@ void Renderer::createScene()
 
     Plane *groundPlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    groundPlane->setMaterial(Material::Mirror());
-    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
+    //groundPlane->setMaterial(Material::Mirror());
+    groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
     //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
     _objects.push_back(groundPlane);
@@ -153,7 +153,7 @@ void Renderer::createScene()
     //leftScenePlane->setMaterial(Material::Rubber());
     leftScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(leftScenePlane);
+    _objects.push_back(leftScenePlane);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -167,7 +167,7 @@ void Renderer::createScene()
     //rightScenePlane->setMaterial(Material::Rubber());
     rightScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(rightScenePlane);
+    _objects.push_back(rightScenePlane);
 
 
     rot.setToIdentity();
@@ -182,7 +182,7 @@ void Renderer::createScene()
     //upScenePlane->setMaterial(Material::Rubber());
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-   // _objects.push_back(upScenePlane);
+   _objects.push_back(upScenePlane);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;
