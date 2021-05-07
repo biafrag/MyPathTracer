@@ -237,9 +237,11 @@ QVector3D RayTracing::getColorAt(IntersectRecord intersection, Ray ray, int indO
 
 QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int indObj, float t, int indVert)
 {
+    QVector3D albedo = QVector3D(0.8f, 0.8f, 0.8f);
+
     if(t < FLT_MAX)
     {
-        QVector3D specular = QVector3D(1.0f, 0.78f, 0.34f);
+        QVector3D specular = object->getMaterial().getSpecular();
 
         QVector3D N;
         point = ray.hit(t);
@@ -258,14 +260,35 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
         //v = i - 2 * n * dot(i n) .
         ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
         ray.energy *= specular;
+        IntersectRecord intersection;
+        RayHit hit;
+        hit.t = t;
+        hit.normal = N;
+        hit.position = point;
+        intersection.hit = hit;
+        intersection.object = object;
+        bool hasNoEffect = hasObjectObstacle(_lights[0], intersection);
+        if(hasNoEffect)
+        {
+            return QVector3D(0, 0, 0);
+        }
 
-        return QVector3D(0.0f, 0.0f, 0.0f);
+        //return QVector3D(0.5, 0.6, 0.3) ;
+
+
+        // Return a diffuse-shaded color
+        //return QVector3D::dotProduct(hit.normal, _lights[0].position) /** _lights[0].diffuse*/ * albedo /*+ _lights[0].ambient * albedo*/;
+        QVector3D diffuse = calculatePhongDiffuse(intersection, _lights[0], indVert); //Adicionar propriedade dos materiais do objeto depois
+        specular = calculatePhongSpecular(intersection, _lights[0]);
+        QVector3D ambient = calculateAmbient(intersection, _lights[0], indVert);
+        return diffuse + ambient + specular;
+
     }
     else
     {
         ray.energy = QVector3D(0.0f, 0.0f, 0.0f);
 
-        return _backgroundColor;
+        return _backgroundColor * _lights[0].diffuse + _backgroundColor * _lights[0].ambient + _backgroundColor * _lights[0].specular;
     }
 
     //return (N * 0.5f) + QVector3D(0.5, 0.5, 0.5);
@@ -514,7 +537,7 @@ QImage RayTracing::generateRayTracingImage2()
                     //Lance um raio
                      Ray cameraPixelRay;
                      cameraPixelRay.origin = _camera.eye;
-
+                     cameraPixelRay.energy = QVector3D(1, 1, 1);
                      float factor = (float)aax/((float)aadepth);
                      if(aadepth == 1)
                      {
@@ -577,11 +600,14 @@ QImage RayTracing::generateRayTracingImage2()
                         {
                             break;
                         }
+                        tCloser = FLT_MAX;
+                        objectCloser = reflection(cameraPixelRay, tCloser, indexObject, vertCloser, indexObject);
                     }
                 }
             }
 
             QVector3D finalColor = totalColor/aadepth*aadepth;
+
             image.setPixelColor(x, y, QColor(std::fmin(finalColor.x() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.y() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.z() * 255/(aadepth*aadepth), 255)));
         }
     }

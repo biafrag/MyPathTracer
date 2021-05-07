@@ -2,6 +2,8 @@
 #define M_PI 3.14159265358979323846
 #include <QMouseEvent>
 #include "raytracing.h"
+#include "pathtracing.h"
+
 #include "sphere.h"
 #include "plane.h"
 #include "trianglemesh.h"
@@ -55,9 +57,14 @@ QImage Renderer::getRayTracedImage(float &time)
     //Levando vértices e normais pro espaço do modelo
     std::vector<QVector3D> vertices;
     std::vector<QVector3D> normals;
-    QImage image = r.generateRayTracingImage();
+    //QImage image = r.generateRayTracingImage();
 
-    time = r.getTime();
+    QImage image = r.generateRayTracingImage2();
+    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0, 0, 0));
+    //QImage image = p.generatePathTracingImage();
+
+
+    //time = r.getTime();
     return image;
 
 }
@@ -76,7 +83,7 @@ void Renderer::createScene()
     //frontScenePlane->setMaterial(Material::Rubber());
     frontScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(frontScenePlane);
+    //_objects.push_back(frontScenePlane);
     material.setAlbedo(QVector3D(0.5, 0, 0));
     //material.color = QVector3D(1, 1, 1);
 
@@ -114,7 +121,7 @@ void Renderer::createScene()
     //backScenePlane->setMaterial(Material::Rubber());
     backScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(backScenePlane);
+    //_objects.push_back(backScenePlane);
 
     rot.setToIdentity();
     rot.rotate(-90, QVector3D(0, 1 , 0));
@@ -146,7 +153,7 @@ void Renderer::createScene()
     //leftScenePlane->setMaterial(Material::Rubber());
     leftScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(leftScenePlane);
+    //_objects.push_back(leftScenePlane);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -160,7 +167,7 @@ void Renderer::createScene()
     //rightScenePlane->setMaterial(Material::Rubber());
     rightScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(rightScenePlane);
+    //_objects.push_back(rightScenePlane);
 
 
     rot.setToIdentity();
@@ -175,7 +182,7 @@ void Renderer::createScene()
     //upScenePlane->setMaterial(Material::Rubber());
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    _objects.push_back(upScenePlane);
+   // _objects.push_back(upScenePlane);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;

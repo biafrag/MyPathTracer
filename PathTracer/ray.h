@@ -19,7 +19,7 @@ struct Ray
 struct RayHit
 {
     QVector3D position;
-    float t;
+    float t = FLT_MAX;
     QVector3D normal;
 };
 
