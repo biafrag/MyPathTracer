@@ -237,8 +237,6 @@ QVector3D RayTracing::getColorAt(IntersectRecord intersection, Ray ray, int indO
 
 QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int indObj, float t, int indVert)
 {
-    QVector3D albedo = QVector3D(0.8f, 0.8f, 0.8f);
-
     if(t < FLT_MAX)
     {
         QVector3D specular = object->getMaterial().getSpecular();

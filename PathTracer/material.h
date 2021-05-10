@@ -24,6 +24,7 @@ public:
     void setSpecular(QVector3D specular);
     void setReflectivity(float reflectivity);
 
+
     void shininess(float shi);
     void setTexture(QImage texture);
 

@@ -21,26 +21,28 @@ private:
 
     bool hasObjectObstacle(Light light, IntersectRecord intersection);
 
-    Object * reflection(Ray ray, float &tCloser, unsigned int &indexObject, unsigned int &vertCloser, unsigned int indMyObject);
+    Object * reflection(Ray ray, float &tCloser, int &indexObject, int &vertCloser, int indMyObject);
 
     QVector3D getRayPoint(float t, Ray ray);
 
-    QVector3D getColorAt(IntersectRecord intersection, Ray ray, int indObj, int indVert = -1);
+    QVector3D getColorAt(IntersectRecord &intersection, Ray &ray, int indObj, int indVert = -1);
 
-//    QColor calculateAmbient(Object *object, Light light, QVector3D point, int ind1 = -1);
+    QVector3D calculateAmbient(IntersectRecord intersection, Light light, int ind1 = -1);
 
-//    QColor calculateDiffuse(Object *object, Light light, float lambertian, QVector3D point, int ind1 = -1);
+    QVector3D calculatePhongDiffuse(IntersectRecord intersection, Light light, int ind1 = -1);
 
-//    QColor calculateSpecular(Object *object, Light light, QVector3D point, QVector3D N);
+    QVector3D calculatePhongSpecular(IntersectRecord intersection, Light light);
 
-    float rand(QVector3D pixel);
+    float rand();
 
-    QVector3D SampleHemisphere(QVector3D normal, QVector3D pixel);
+    float rand2(QVector3D point);
+
+    QVector3D SampleHemisphere(QVector3D normal, float alpha = 0);
 
     QMatrix4x4 GetTangentSpace(QVector3D normal);
 
 private:
-
+    float clamp(float number, float low, float high);
     QMatrix4x4 _model;
 
     QVector3D _Xe, _Ye, _Ze;
