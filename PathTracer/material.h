@@ -15,6 +15,8 @@ public:
     const QVector3D getSpecular();
     float getShi();
     float getReflectivity();
+    QVector3D getEmission();
+    float getSmoothness();
 
     bool hasTexture();
     QImage getTexture();
@@ -23,7 +25,8 @@ public:
     void setAlbedo(QVector3D albedo);
     void setSpecular(QVector3D specular);
     void setReflectivity(float reflectivity);
-
+    void setEmission(QVector3D emission);
+    void setSmoothness(float smoothness);
 
     void shininess(float shi);
     void setTexture(QImage texture);
@@ -40,7 +43,10 @@ private:
     QVector3D _specular = {0, 0, 0};
     float _reflectivity = 1;
     float _shininess = 60.0f;
+    float _smoothness = 0.5f;
+
     bool _hasTexture = false;
     QImage _texture;
+    QVector3D _emission = {0, 0, 0};
 };
 

@@ -21,6 +21,10 @@ struct RayHit
     QVector3D position;
     float t = FLT_MAX;
     QVector3D normal;
+    QVector3D albedo;
+    QVector3D specular;
+    QVector3D emission;
+    float smoothness;
 };
 
 

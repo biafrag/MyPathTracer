@@ -25,13 +25,19 @@ private:
 
     QVector3D getRayPoint(float t, Ray ray);
 
-    QVector3D getColorAt(IntersectRecord &intersection, Ray &ray, int indObj, int indVert = -1);
+    QVector3D getColorAt(RayHit &hit, Ray &ray);
+    QVector3D getColorFinalAt(RayHit &hit, Ray &ray);
+
+    QVector3D getColorDiffuseAt(RayHit &hit, Ray &ray);
+
 
     QVector3D calculateAmbient(IntersectRecord intersection, Light light, int ind1 = -1);
 
     QVector3D calculatePhongDiffuse(IntersectRecord intersection, Light light, int ind1 = -1);
 
     QVector3D calculatePhongSpecular(IntersectRecord intersection, Light light);
+
+    QVector3D getAlbedoPoint(RayHit hit, Object * object, int indVert);
 
     float rand();
 
@@ -40,6 +46,8 @@ private:
     QVector3D SampleHemisphere(QVector3D normal, float alpha = 0);
 
     QMatrix4x4 GetTangentSpace(QVector3D normal);
+
+    RayHit Trace(Ray ray);
 
 private:
     float clamp(float number, float low, float high);

@@ -63,7 +63,7 @@ QImage Renderer::getRayTracedImage(float &time)
     //QImage image = r.generateRayTracingImage();
 
     //QImage image = r.generateRayTracingImage2();
-    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(1, 1, 1));
+    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.7, 0.7, 0.7));
     QImage image = p.generatePathTracingImage();
 
 
@@ -107,7 +107,7 @@ void Renderer::createScene()
 //    material.setSpecular(specular);
 
     Sphere *s =  new Sphere(QVector3D(0, 0, 1));
-    s->setMaterial(material);
+    s->setMaterial(Material::Gold());
     //s->setMaterial(material);
 
     _objects.push_back(s);
@@ -183,10 +183,10 @@ void Renderer::createScene()
     scale.scale(QVector3D(5, 5, 5));
 
     Plane *groundPlane =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(1, 0, 0));
-    groundPlane->setMaterial(material);
+    material.setAlbedo(QVector3D(1, 1, 1));
+    //groundPlane->setMaterial(material);
     //groundPlane->setMaterial(Material::Mirror());
-    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
+    groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
     //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
     _objects.push_back(groundPlane);
