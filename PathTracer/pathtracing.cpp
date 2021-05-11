@@ -125,7 +125,7 @@ QImage PathTracing::generatePathTracingImage()
     //b é a largura real
     float b = (a * _width)/_height;
 
-    unsigned int aadepth = 30;
+    unsigned int aadepth = 40;
 
     //Passada do JFA
     auto start  = std::chrono::high_resolution_clock::now();
@@ -233,9 +233,9 @@ QVector3D PathTracing::getColorAt(RayHit &hit, Ray &ray)
 
             QVector3D reflect = ray.direction - 2 * hit.normal * QVector3D::dotProduct(ray.direction, hit.normal);
             ray.direction = reflect;
-            float dot = clamp(QVector3D::dotProduct(hit.normal, ray.direction), 0, 1);
+            float dot = clamp(QVector3D::dotProduct(hit.normal.normalized(), ray.direction.normalized() ), 0, 1);
 
-            ray.energy *= (1.0f / specChance) * hit.specular /** dot*/;
+            ray.energy *= (1.0f / specChance) * hit.specular * dot;
         }
         else
         {
@@ -283,11 +283,11 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
             ray.origin = hit.position + hit.normal * 0.001f;
             float alpha = SmoothnessToPhongAlpha(hit.smoothness);
             QVector3D reflect = ray.direction - 2 * hit.normal * QVector3D::dotProduct(ray.direction, hit.normal);
-            ray.direction = reflect;/*SampleHemisphere(reflect, alpha);*/
+            ray.direction = SampleHemisphere(reflect.normalized(), alpha);
             float f = (alpha + 2) / (alpha + 1);
-            float dot = clamp(QVector3D::dotProduct(hit.normal, ray.direction) * f, 0, 1);
+            float dot = clamp(QVector3D::dotProduct(hit.normal.normalized(), ray.direction.normalized()) * f, 0, 1);
 
-            ray.energy *= (1.0f / specChance) * hit.specular/* * dot*/;
+            ray.energy *= (1.0f / specChance) * hit.specular * dot;
         }
         else if (diffChance > 0 && roulette < specChance + diffChance)
         {
