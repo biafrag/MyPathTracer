@@ -255,7 +255,6 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
         }
 
         ray.origin = point + N * 0.001f;
-        //v = i - 2 * n * dot(i n) .
         ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
         ray.energy *= specular;
         IntersectRecord intersection;
@@ -273,9 +272,6 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
             return ambient;
         }
 
-        //return QVector3D(0.5, 0.6, 0.3) ;
-
-
         // Return a diffuse-shaded color
         //return QVector3D::dotProduct(hit.normal, _lights[0].position) /** _lights[0].diffuse*/ * albedo /*+ _lights[0].ambient * albedo*/;
         QVector3D diffuse = calculatePhongDiffuse(intersection, _lights[0], indVert); //Adicionar propriedade dos materiais do objeto depois
@@ -289,8 +285,6 @@ QVector3D RayTracing::getColorAt2(QVector3D point, Ray &ray, Object *object, int
 
         return _backgroundColor;
     }
-
-    //return (N * 0.5f) + QVector3D(0.5, 0.5, 0.5);
 }
 
 

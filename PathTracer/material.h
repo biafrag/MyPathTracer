@@ -43,7 +43,7 @@ private:
     QVector3D _specular = {0, 0, 0};
     float _reflectivity = 1;
     float _shininess = 60.0f;
-    float _smoothness = 0.5f;
+    float _smoothness = 1.0f;
 
     bool _hasTexture = false;
     QImage _texture;

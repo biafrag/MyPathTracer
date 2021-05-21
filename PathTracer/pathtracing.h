@@ -19,29 +19,15 @@ public:
 
 private:
 
-    bool hasObjectObstacle(Light light, IntersectRecord intersection);
-
-    Object * reflection(Ray ray, float &tCloser, int &indexObject, int &vertCloser, int indMyObject);
-
-    QVector3D getRayPoint(float t, Ray ray);
-
     QVector3D getColorAt(RayHit &hit, Ray &ray);
     QVector3D getColorFinalAt(RayHit &hit, Ray &ray);
 
     QVector3D getColorDiffuseAt(RayHit &hit, Ray &ray);
 
 
-    QVector3D calculateAmbient(IntersectRecord intersection, Light light, int ind1 = -1);
-
-    QVector3D calculatePhongDiffuse(IntersectRecord intersection, Light light, int ind1 = -1);
-
-    QVector3D calculatePhongSpecular(IntersectRecord intersection, Light light);
-
     QVector3D getAlbedoPoint(RayHit hit, Object * object, int indVert);
 
     float rand();
-
-    float rand2(QVector3D point);
 
     QVector3D SampleHemisphere(QVector3D normal, float alpha = 0);
 
@@ -49,8 +35,9 @@ private:
 
     RayHit Trace(Ray ray);
 
-private:
     float clamp(float number, float low, float high);
+
+private:
     QMatrix4x4 _model;
 
     QVector3D _Xe, _Ye, _Ze;
@@ -67,7 +54,8 @@ private:
 
     float _time;
 
-    int _sphereSeed = 1223832719;
+    int _sphereSeed = 12000;
+
     float _seed;
 
 };

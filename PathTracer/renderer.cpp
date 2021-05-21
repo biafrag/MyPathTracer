@@ -63,7 +63,7 @@ QImage Renderer::getRayTracedImage(float &time)
     //QImage image = r.generateRayTracingImage();
 
     //QImage image = r.generateRayTracingImage2();
-    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.7, 0.7, 0.7));
+    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.9, 0.9, 0.9));
     QImage image = p.generatePathTracingImage();
 
 
@@ -82,7 +82,7 @@ void Renderer::createScene()
     trans.translate(QVector3D(0, -100, 0));
     Plane *frontScenePlane=  new Plane(trans, rot, scale);
     Material material;
-    material.setAlbedo(QVector3D(1, 1, 0));
+    material.setAlbedo(QVector3D(0.5, 0.5, 1));
     material.setSpecular(QVector3D(0, 0, 0));
     //frontScenePlane->setMaterial(Material::Rubber());
     frontScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
@@ -91,14 +91,14 @@ void Renderer::createScene()
 //    material.setAlbedo(QVector3D(0.5, 0, 0));
     //material.color = QVector3D(1, 1, 1);
 
-//    // Albedo and specular color
-//    QVector3D color = randVec();
-//    float prob = rand0x1();
-//    float shi = rand30x200();
-//    bool metal = true;
-//    QVector3D albedo, specular;
-//    albedo = metal ? QVector3D(0, 0, 0) : color;
-//    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    // Albedo and specular color
+    QVector3D color = randVec();
+    float prob = rand0x1();
+    float shi = rand30x200();
+    bool metal = prob < 0.5f;
+    QVector3D albedo, specular;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
 //    material.setAlbedo(albedo);
 //    material.setSpecular(specular);
 //    material.shininess(shi);
@@ -108,26 +108,72 @@ void Renderer::createScene()
 
     Sphere *s =  new Sphere(QVector3D(0, 0, 1));
     s->setMaterial(Material::Gold());
-    //s->setMaterial(material);
+    material.setEmission(QVector3D(0.5, 0.5, 0.5));
+
+   // s->setMaterial(material);
 
     _objects.push_back(s);
 
     material.setAlbedo( QVector3D(1, 0.3, 0.7));
-
-//    color = randVec();
-//    prob = rand0x1();
-//    shi = rand30x200();
-//    metal = prob < 0.0f;
-//    albedo = metal ? QVector3D(0, 0, 0) : color;
-//    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
-//    material.setAlbedo(albedo);
-//    material.setSpecular(specular);
-//    material.shininess(shi);
+    material.setEmission(QVector3D(0, 0, 0));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
 
     Sphere *s2 =  new Sphere(QVector3D(-3, 1, 0.5), 0.5);
     s2->setMaterial(material);
     _objects.push_back(s2);
 
+    material.setAlbedo( QVector3D(1, 0.3, 0.7));
+    //material.setEmission(QVector3D(0, 0, 0));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
+
+    Sphere *s5 =  new Sphere(QVector3D(0, 2, 0.5), 0.5);
+    s5->setMaterial(material);
+    _objects.push_back(s5);
+
+    material.setAlbedo( QVector3D(1, 0.3, 0.7));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
+
+    Sphere *s6 =  new Sphere(QVector3D(3, -2, 0.5), 0.5);
+    s6->setMaterial(material);
+    _objects.push_back(s6);
+
+    material.setAlbedo( QVector3D(1, 0.3, 0.7));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
+    Sphere *s7 =  new Sphere(QVector3D(-3, -2, 0.5), 0.5);
+    s7->setMaterial(material);
+    _objects.push_back(s7);
 //    color = randVec();
 //    prob = rand0x1();
 //    shi = rand30x200();
@@ -138,6 +184,16 @@ void Renderer::createScene()
 //    material.setSpecular(specular);
 //    material.shininess(shi);
 
+    material.setAlbedo( QVector3D(1, 0.3, 0.7));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
     Sphere *s3 =  new Sphere(QVector3D(3, 1, 0.5), 0.5);
     s3->setMaterial(material);
     _objects.push_back(s3);
@@ -151,6 +207,17 @@ void Renderer::createScene()
 //    material.setAlbedo(albedo);
 //    material.setSpecular(specular);
 //    material.shininess(shi);
+
+    material.setAlbedo( QVector3D(1, 0.3, 0.7));
+    color = randVec();
+    prob = rand0x1();
+    shi = rand30x200();
+    metal = prob < 0.5f;
+    albedo = metal ? QVector3D(0, 0, 0) : color;
+    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
+    material.setAlbedo(albedo);
+    material.setSpecular(specular);
+    material.shininess(shi);
 
 
     Sphere *s4 =  new Sphere(QVector3D(0, -3, 0.5), 0.5);
@@ -183,10 +250,10 @@ void Renderer::createScene()
     scale.scale(QVector3D(5, 5, 5));
 
     Plane *groundPlane =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(1, 1, 1));
-    //groundPlane->setMaterial(material);
+    material.setAlbedo(QVector3D(0.5, 0.3, 0.3));
+    groundPlane->setMaterial(material);
     //groundPlane->setMaterial(Material::Mirror());
-    groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
+    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
     //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
     _objects.push_back(groundPlane);
@@ -228,7 +295,7 @@ void Renderer::createScene()
     scale.scale(QVector3D(100, 100, 100));
 
     Plane *upScenePlane =  new Plane(trans, rot, scale);
-    material.setAlbedo(QVector3D(1, 1, 0));
+    material.setAlbedo(QVector3D(1, 1, 1));
     //upScenePlane->setMaterial(Material::Rubber());
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
@@ -248,7 +315,7 @@ void Renderer::createScene()
      //material.isReflective = true;
      //material.color = QVector3D(0.5,0.5,0.5);
 
-    readFile("../PathTracer/Malhas/Thetrahedron.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+    readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
 
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
 
@@ -256,7 +323,9 @@ void Renderer::createScene()
     {
         t->computeNormals();
     }
-    material = Material::Gold();
+    //material = Material::Gold();
+    material.setEmission(QVector3D(1, 1, 1));
+
     t->setMaterial(material);
    //_objects.push_back(t);
 }

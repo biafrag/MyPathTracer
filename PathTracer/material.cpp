@@ -143,9 +143,9 @@ void Material::setTexture(QImage texture)
 
  Material Material::Gold()
 {
-     Material m("Gold", QVector3D(0, 0, 0), QVector3D(1.0f, 0.78f, 0.34f), 51.2, 0.6, false);
-     //m.setEmission(Q0.7,0.7,0.7});
-     m.setSmoothness(1);
+     Material m("Gold", QVector3D(0.0, 0.0, 0.0), QVector3D(0.7f, 0.7f, 0.7f), 51.2, 0.6, false);
+     m.setEmission(QVector3D(0.2, 0.2, 0.2));
+     m.setSmoothness(0.8);
      return m;
 }
 

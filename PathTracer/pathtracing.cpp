@@ -15,7 +15,7 @@ PathTracing::PathTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam, s
       _width(w),
       _height(h)
 {
-    std::srand(12000); //use current time as seed for random generator
+    std::srand(_sphereSeed); //use current time as seed for random generator
 
     _seed = std::rand();
 
@@ -25,94 +25,6 @@ PathTracing::PathTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam, s
 }
 
 
-
-bool PathTracing::hasObjectObstacle(Light light, IntersectRecord intersection)
-{
-    RayHit hit = intersection.hit;
-    Ray pointLightRay;
-    pointLightRay.origin = hit.position;
-    pointLightRay.direction = (light.position - hit.position).normalized();
-    for(unsigned int o = 0; o < _objects.size(); o++)
-    {
-        if(_objects[o] != intersection.object)
-        {
-            ObjectType type = _objects[o]->getObjectType();
-            if(type == ObjectType::SPHERE)
-            {
-                Sphere *s = dynamic_cast<Sphere *>(_objects[o]);
-                float t = s->intersectsWith(pointLightRay, _model);
-                if(t > 0 && t < 1)
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
-                bool verif = mesh->isRayIntersecting(pointLightRay, _model);
-                if(verif)
-                {
-                    return true;
-                }
-            }
-        }
-
-    }
-    return false;
-}
-
-
-
-Object * PathTracing::reflection(Ray ray, float &tCloser, int &indexObject, int &vertCloser, int indMyObject)
-{
-    //Variável que vai guardar qual é o menor t, ou seja, qual o ponto mais a frente que o raio atinge
-    float tAux = FLT_MAX;
-    Object * objectCloser = nullptr;
-
-    bool isSphere = false;
-    for(unsigned int o = 0; o < _objects.size(); o++)
-    {
-        if(indMyObject != o)
-        {
-            ObjectType type = _objects[o]->getObjectType();
-            if(type == ObjectType::SPHERE)
-            {
-                Sphere *s = dynamic_cast<Sphere *>(_objects[o]);
-                float t = s->intersectsWith(ray, _model);
-
-                if( t < tAux && t>0)
-                {
-                    tAux = t;
-                    objectCloser = _objects[o];
-                    indexObject = o;
-                    isSphere = true;
-                }
-            }
-            else
-            {
-                TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
-                int indTri;
-                float t = mesh->intersectsWithRay(ray, _model, tCloser, indTri);
-                if( t < tAux && t>0 && indTri >= 0 )
-                {
-                    tAux = t;
-                    objectCloser = _objects[o];
-                    indexObject = o;
-                    vertCloser = indTri;
-                }
-            }
-        }
-    }
-    tCloser = tAux;
-    return objectCloser;
-}
-
-
-
-QVector3D PathTracing::getRayPoint(float t, Ray ray)
-{
-    return ray.origin + (t * ray.direction);
-}
 
 
 QImage PathTracing::generatePathTracingImage()
@@ -125,7 +37,7 @@ QImage PathTracing::generatePathTracingImage()
     //b é a largura real
     float b = (a * _width)/_height;
 
-    unsigned int aadepth = 40;
+    unsigned int aadepth = 150;
 
     //Passada do JFA
     auto start  = std::chrono::high_resolution_clock::now();
@@ -257,10 +169,13 @@ QVector3D PathTracing::getColorAt(RayHit &hit, Ray &ray)
 }
 
 
+
 float SmoothnessToPhongAlpha(float s)
 {
     return pow(1000.0f, s * s);
 }
+
+
 
 QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
 {
@@ -270,7 +185,6 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
          //Calculate chances of diffuse and specular reflection
         QVector3D aux = QVector3D(1, 1, 1) - hit.specular;
         QVector3D min = QVector3D(std::min(aux.x(), hit.albedo.x()), std::min(aux.y(), hit.albedo.y()), std::min(aux.z(), hit.albedo.z()));
-        QVector3D diffuse = 2 * min;
 
         float specChance = energy(hit.specular);
         float diffChance = energy(min);
@@ -338,101 +252,6 @@ QVector3D PathTracing::getColorDiffuseAt(RayHit &hit, Ray &ray)
 
 
 
-QVector3D PathTracing::calculateAmbient(IntersectRecord intersection, Light light, int ind1)
-{
-    Object *object = intersection.object;
-    Material material = intersection.object->getMaterial();
-    RayHit hit = intersection.hit;
-
-    QVector3D color(0, 0, 0);
-    if(material.hasTexture())
-    {
-        TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
-
-        QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, hit.position, _model);
-
-        QImage texture = material.getTexture();
-        QColor aux = texture.pixelColor(texInt.x() * texture.width(), (texInt.y() * texture.height()));
-        color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
-    }
-    else
-    {
-        color = material.getAlbedo();
-    }
-    QVector3D corVec = light.ambient * color;
-
-    return corVec;
-}
-
-
-
-QVector3D PathTracing::calculatePhongDiffuse(IntersectRecord intersection, Light light, int ind1 )
-{
-   Object *object = intersection.object;
-   Material material = intersection.object->getMaterial();
-   RayHit hit = intersection.hit;
-
-   QVector3D L = (light.position - hit.position).normalized();
-
-   float lambertian = QVector3D::dotProduct(L, hit.normal);
-    QVector3D color(0, 0, 0);
-   // if(lambertian > 0)
-    {
-        if(material.hasTexture())
-        {
-            TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
-
-            QVector3D texInt = mesh->getTexCoordinatesInsideTriangle(ind1, hit.position, _model);
-
-            QImage texture = material.getTexture();
-            QColor aux = texture.pixelColor(texInt.x() * texture.width(), texture.height() - (texInt.y() * texture.height()));
-            color = QVector3D(aux.red()/255.0, aux.green()/255.0, aux.blue()/255.0);
-        }
-        else
-        {
-            color = material.getAlbedo();
-        }
-
-    }
-    QVector3D corVec = /*lambertian * light.diffuse * */color;
-
-    return corVec;
-}
-
-
-
-QVector3D PathTracing::calculatePhongSpecular(IntersectRecord intersection, Light light)
-{
-    RayHit hit = intersection.hit;
-    Object *object = intersection.object;
-    QVector3D L = (light.position - hit.position).normalized();
-
-    QVector3D V = (_camera.eye - hit.position).normalized();
-    QVector3D H = (L+V).normalized();
-    float dotP = QVector3D::dotProduct(hit.normal, H);
-    float ispec;
-    Material material = object->getMaterial();
-
-    float lambertian = QVector3D::dotProduct(L, hit.normal);
-     QVector3D specular(0, 0, 0);
-     if(lambertian > 0)
-     {
-         if(dotP > 0)
-         {
-             ispec = std::pow(dotP, material.getShi());
-         }
-         else
-         {
-             ispec = 0;
-         }
-         specular = /*material.getSpecular() * */light.specular * ispec;
-     }
-
-     return specular;
-}
-
-
-
 QVector3D PathTracing::getAlbedoPoint(RayHit hit, Object *object, int indVert)
 {
      Material material = object->getMaterial();
@@ -464,7 +283,6 @@ float PathTracing::rand()
 {
     float rand = std::rand();
     float number;
-    double randMax = RAND_MAX;
     if(rand + _seed <= RAND_MAX)
     {
         number = ((float) (rand + _seed) / (RAND_MAX ));
@@ -483,16 +301,6 @@ float PathTracing::rand()
 
 
 
-float PathTracing::rand2(QVector3D point)
-{
-    float intPart;
-    float result = std::modf(sin(_seed / 100.0f * QVector3D::dotProduct(point, QVector3D(12.9898f, 78.233f, 0))) * 43758.5453f, &intPart);
-    _seed += 1.0f;
-    return result;
-}
-
-
-
 QVector3D PathTracing::SampleHemisphere(QVector3D normal, float alpha)
 {
     // Uniformly sample hemisphere direction
@@ -501,20 +309,10 @@ QVector3D PathTracing::SampleHemisphere(QVector3D normal, float alpha)
     float phi = 2 * M_PI * rand();
     QVector3D tangentSpaceDir = QVector3D(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
     QMatrix4x4 tangentSpaceMatrix =  GetTangentSpace(normal);
+
     // Transform direction to world space
     QVector3D result = (tangentSpaceDir * tangentSpaceMatrix);
     return result;
-
-//    // Uniformly sample hemisphere direction
-//    float cosTheta = rand();
-//    float sinTheta = sqrt(std::max(0.0f, 1.0f - cosTheta * cosTheta));
-//    float phi = 2 * M_PI * rand();
-//    QVector3D tangentSpaceDir = QVector3D(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-//    QMatrix4x4 tangentSpaceMatrix =  GetTangentSpace(normal);
-//    QVector3D result = (tangentSpaceDir * tangentSpaceMatrix);
-
-//    // Transform direction to world space
-//    return result;
 }
 
 
@@ -525,6 +323,7 @@ QMatrix4x4 PathTracing::GetTangentSpace(QVector3D normal)
     QVector3D helper = QVector3D(1, 0, 0);
     if (abs(normal.x()) > 0.99f)
         helper = QVector3D(0, 0, 1);
+
     // Generate vectors
     QVector3D tangent = QVector3D::crossProduct(normal, helper).normalized();
     QVector3D binormal = QVector3D::crossProduct(normal, tangent).normalized();
