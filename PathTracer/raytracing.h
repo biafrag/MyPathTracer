@@ -11,12 +11,12 @@ class RayTracing
 {
 public:
 
-    RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
-               std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor = {0, 0, 0});
+    RayTracing();
 
-    QImage generateRayTracingImage();
+    QImage generateRayTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam, std::vector<Object *> &objects, std::vector<Light> &lights, QVector3D backgroundColor);
     QImage generateRayTracingImage2();
 
+    void setDimensions(int width, int height);
 
     float getTime();
 

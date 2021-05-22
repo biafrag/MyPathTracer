@@ -16,7 +16,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+
+    void on_raySpinBox_valueChanged(int arg1);
+
+    void on_rayTracingButton_clicked();
+
+    void on_pathTracingButton_clicked();
 
 private:
     Ui::MainWindow *ui;

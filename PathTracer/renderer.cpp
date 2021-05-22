@@ -48,28 +48,45 @@ Renderer::Renderer(QWidget *parent)
     _lights.push_back(light2);
     //_lights.push_back(light3);
 
+    _pathTracer = new PathTracing();
+    _rayTracer = new RayTracing();
 
+}
+
+
+
+Renderer::~Renderer()
+{
+    delete _pathTracer;
+    delete _rayTracer;
 }
 
 
 
 QImage Renderer::getRayTracedImage(float &time)
 {
-    RayTracing r(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0, 0, 0));
-
-    //Levando vértices e normais pro espaço do modelo
-    std::vector<QVector3D> vertices;
-    std::vector<QVector3D> normals;
-    //QImage image = r.generateRayTracingImage();
-
-    //QImage image = r.generateRayTracingImage2();
-    PathTracing p(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.9, 0.9, 0.9));
-    QImage image = p.generatePathTracingImage();
-
-
-    //time = r.getTime();
+    //_rayTracer = new RayTracing(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0, 0, 0));
+    QImage image = _rayTracer->generateRayTracingImage(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0, 0, 0));
+    time = _rayTracer->getTime();
     return image;
 
+}
+
+
+
+QImage Renderer::getPathTracedImage(float &time)
+{
+    //_pathTracer = new PathTracing(width(), height(), _model,  _camera, _objects, _lights, QVector3D(0.9, 0.9, 0.9));
+    QImage image = _pathTracer->generatePathTracingImage(width(), height(), _model,  _camera, _objects, QVector3D(0.9, 0.9, 0.9));
+    time = _pathTracer->getTime();
+    return image;
+}
+
+
+
+void Renderer::setNumberOfRays(unsigned int rays)
+{
+    _pathTracer->setRayNumber(rays);
 }
 
 
@@ -479,6 +496,6 @@ void Renderer::resizeGL(int w, int h)
 {
     //Atualizar a viewport
     glViewport(0, 0, w, h);
-
+    _pathTracer->setDimensions(w, h);
     _radius = ((std::min(h,w)/2.0) - 1);
 }

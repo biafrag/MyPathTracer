@@ -10,21 +10,8 @@
 
 #define M_PI 3.1415
 
-RayTracing::RayTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
-                       std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor)
-
-    : _model(model),
-      _backgroundColor(backgroundColor),
-      _camera(cam),
-      _objects(objects),
-      _lights(lights),
-      _width(w),
-      _height(h)
-
+RayTracing::RayTracing()
 {
-    _Ze = (_camera.eye - cam.center).normalized();
-    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
-    _Ye = QVector3D::crossProduct(_Ze, _Xe);
 }
 
 
@@ -384,9 +371,21 @@ QVector3D RayTracing::calculatePhongSpecular(IntersectRecord intersection, Light
 
 
 
-QImage RayTracing::generateRayTracingImage()
+QImage RayTracing::generateRayTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
+                                           std::vector<Object *> &objects, std::vector<Light> &lights, QVector3D backgroundColor = {0, 0, 0})
 {
+    _model = model;
+    _backgroundColor = backgroundColor,
+    _camera = cam;
+    _objects = objects;
+    _lights = lights;
+    _width = w;
+    _height = h;
     QImage image(_width, _height, QImage::Format_RGB32);
+
+    _Ze = (_camera.eye - cam.center).normalized();
+    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
+    _Ye = QVector3D::crossProduct(_Ze, _Xe);
 
     //a é a altura real
     float a = 2 * _camera.zNear * tan(_camera.fov* (M_PI/180)/2.0);
@@ -609,6 +608,14 @@ QImage RayTracing::generateRayTracingImage2()
     _time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
     return image;
+}
+
+
+
+void RayTracing::setDimensions(int width, int height)
+{
+    _width = width;
+    _height = height;
 }
 
 

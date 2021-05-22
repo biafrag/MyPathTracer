@@ -16,11 +16,25 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_raySpinBox_valueChanged(int arg1)
+{
+    ui->openGLWidget->setNumberOfRays(arg1);
+}
+
+void MainWindow::on_rayTracingButton_clicked()
 {
     float time;
     QImage image = ui->openGLWidget->getRayTracedImage(time);
 
     ui->label->setPixmap(QPixmap::fromImage(image));
-    //ui->label_2->setText("Tempo de renderizazao: " + QString::number(time) + " s");
+    ui->timeLabel->setText(QString::number(time) + " s");
+}
+
+void MainWindow::on_pathTracingButton_clicked()
+{
+    float time;
+    QImage image = ui->openGLWidget->getPathTracedImage(time);
+
+    ui->label->setPixmap(QPixmap::fromImage(image));
+    ui->timeLabel->setText(QString::number(time) + " s");
 }

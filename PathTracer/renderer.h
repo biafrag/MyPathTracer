@@ -9,11 +9,15 @@
 #include <vector>
 #include "light.h"
 
+class RayTracing;
+class PathTracing;
+
 class Renderer  : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
 
 public:
     Renderer(QWidget* parent);
+    ~Renderer();
 
     struct Camera
     {
@@ -33,6 +37,11 @@ public:
 
 
     QImage getRayTracedImage(float &time);
+
+    QImage getPathTracedImage(float &time);
+
+    void setNumberOfRays(unsigned int rays);
+
 
 private:
     void createMaterialLib();
@@ -82,5 +91,9 @@ private:
     std::vector<Light> _lights;
 
     std::vector<Object *> _objects;
+
+    RayTracing *_rayTracer;
+
+    PathTracing * _pathTracer;
 };
 

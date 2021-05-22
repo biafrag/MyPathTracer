@@ -6,29 +6,30 @@
 #include <chrono>
 #define M_PI 3.1415
 
-PathTracing::PathTracing(int w, int h, QMatrix4x4 model, Renderer::Camera cam, std::vector<Object *> objects, std::vector<Light> lights, QVector3D backgroundColor)
-    : _model(model),
-      _backgroundColor(backgroundColor),
-      _camera(cam),
-      _objects(objects),
-      _lights(lights),
-      _width(w),
-      _height(h)
+PathTracing::PathTracing()
 {
     std::srand(_sphereSeed); //use current time as seed for random generator
 
     _seed = std::rand();
-
-    _Ze = (_camera.eye - cam.center).normalized();
-    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
-    _Ye = QVector3D::crossProduct(_Ze, _Xe);
 }
 
 
 
 
-QImage PathTracing::generatePathTracingImage()
+QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
+                                             std::vector<Object *> &objects, QVector3D backgroundColor)
 {
+    _model = model;
+    _backgroundColor = backgroundColor,
+    _camera = cam;
+    _objects = objects;
+    _width = w;
+    _height = h;
+
+    _Ze = (_camera.eye - cam.center).normalized();
+    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
+    _Ye = QVector3D::crossProduct(_Ze, _Xe);
+
     QImage image(_width, _height, QImage::Format_RGB32);
 
     //a é a altura real
@@ -36,8 +37,6 @@ QImage PathTracing::generatePathTracingImage()
 
     //b é a largura real
     float b = (a * _width)/_height;
-
-    unsigned int aadepth = 150;
 
     //Passada do JFA
     auto start  = std::chrono::high_resolution_clock::now();
@@ -49,26 +48,39 @@ QImage PathTracing::generatePathTracingImage()
             QVector3D totalColor = QVector3D(0, 0, 0);
 
             #pragma omp parallel for
-            for (unsigned int aax = 0; aax < aadepth; aax++)
+            int xAmount = sqrt(_rayNumber);
+            int yAmount = xAmount;
+            for (unsigned int aax = 0; aax < xAmount; aax++)
             {
-                for (unsigned int aay = 0; aay < aadepth; aay++)
+                for (unsigned int aay = 0; aay < yAmount; aay++)
                 {
                     QVector3D color = QVector3D(0, 0, 0);
 
                     //Lance um raio
                      Ray ray;
                      ray.origin = _camera.eye;
-                     float factor = (float)aax/((float)aadepth);
-                     if(aadepth == 1)
+                     float factorY = (float)aay/((float)yAmount);
+                     float factorX = (float)aax/((float)xAmount);
+
+                     if(yAmount == 1)
                      {
-                         factor = 0;
+                         factorY = 0;
                      }
                      else
                      {
-                         factor = (float)aax/((float)aadepth - 1);
+                         factorY = (float)aay/((float)yAmount - 1);
+                     }
+
+                     if(xAmount == 1)
+                     {
+                         factorX = 0;
+                     }
+                     else
+                     {
+                         factorX = (float)aax/((float)xAmount - 1);
                      }
                      //d é um vetor que vai do olho até a tela
-                     QVector3D d = (- _camera.zNear * _Ze) + (a*((((_height-y) + factor)/(float)_height) - 0.5) * _Ye) + b * ((((float)x + factor)/(float)_width) - 0.5) * _Xe;
+                     QVector3D d = (- _camera.zNear * _Ze) + (a*((((_height-y) + factorY)/(float)_height) - 0.5) * _Ye) + b * ((((float)x + factorX)/(float)_width) - 0.5) * _Xe;
                      ray.direction = d;
                     RayHit bestHit;
                     QVector3D energy;
@@ -86,12 +98,10 @@ QImage PathTracing::generatePathTracingImage()
                         }
                     }
                     totalColor = totalColor + color;
-
                 }
             }
 
-            int samples = aadepth*aadepth;
-            QVector3D finalColor = totalColor/ samples;
+            QVector3D finalColor = totalColor/ _rayNumber;
 
             if(finalColor.x() < 0)
             {
@@ -114,6 +124,31 @@ QImage PathTracing::generatePathTracingImage()
     std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
     return image;
 }
+
+
+
+float PathTracing::getTime()
+{
+    return _time;
+}
+
+
+
+void PathTracing::setRayNumber(unsigned int number)
+{
+    _rayNumber = number;
+}
+
+
+
+void PathTracing::setDimensions(int width, int height)
+{
+    _width = width;
+
+    _height = height;
+}
+
+
 
 float energy(QVector3D color)
 {
