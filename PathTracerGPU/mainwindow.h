@@ -15,19 +15,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-
-    void on_raySpinBox_valueChanged(int arg1);
-
-    void on_rayTracingButton_clicked();
-
-    void on_pathTracingButton_clicked();
-
-    void on_horizontalSlider_valueChanged(int value);
-
-    void activeCPU(bool active);
-    void activeGPU(bool active);
-
 private:
     Ui::MainWindow *ui;
 };

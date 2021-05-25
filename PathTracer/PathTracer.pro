@@ -1,5 +1,4 @@
 QT       += core gui
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -20,6 +19,7 @@ SOURCES += \
     mainwindow.cpp \
     material.cpp \
     object.cpp \
+    pathtracergpu.cpp \
     pathtracing.cpp \
     plane.cpp \
     raytracing.cpp \
@@ -34,6 +34,7 @@ HEADERS += \
     mainwindow.h \
     material.h \
     object.h \
+    pathtracergpu.h \
     pathtracing.h \
     plane.h \
     ray.h \
