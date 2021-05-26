@@ -270,7 +270,7 @@ void Renderer::createScene()
     material.setAlbedo(QVector3D(0.5, 0.3, 0.3));
     groundPlane->setMaterial(material);
     //groundPlane->setMaterial(Material::Mirror());
-    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
+    groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
     //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
     _objects.push_back(groundPlane);

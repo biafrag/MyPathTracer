@@ -30,7 +30,14 @@ public:
     bool isRayIntersecting(Ray ray, QMatrix4x4 m);
     void computeNormals();
     void normalizeNormals();
-private:
+
+protected:
+    void createTexture() override;
+
+    unsigned int _textureID = static_cast<unsigned int>(-1);
 
     QOpenGLVertexArrayObject _vao;
+private:
+
+//    QOpenGLVertexArrayObject _vao;
 };

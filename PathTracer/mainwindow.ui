@@ -152,7 +152,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QOpenGLWidget" name="openGLWidget_2"/>
+         <widget class="PathTracerGPU" name="openGLWidget_2"/>
         </item>
        </layout>
       </item>
@@ -208,6 +208,11 @@
    <class>Renderer</class>
    <extends>QOpenGLWidget</extends>
    <header>renderer.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PathTracerGPU</class>
+   <extends>QOpenGLWidget</extends>
+   <header location="global">pathtracergpu.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

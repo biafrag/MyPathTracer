@@ -9,8 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    activeCPU(true);
-    activeGPU(false);
+    activeCPU(false);
+    activeGPU(true);
 }
 
 MainWindow::~MainWindow()

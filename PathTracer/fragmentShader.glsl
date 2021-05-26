@@ -17,10 +17,11 @@ struct Light
 
 //uniform Light light;
 uniform Material material;
-
+uniform int hasTexture;
 in vec3 fragPos;
 in vec3 fragNormal;
 in vec2 fragUV;
+uniform sampler2D sampler;
 
 const int NR_LIGHTS = 2;
 
@@ -30,10 +31,20 @@ out vec4 color;
 void main()
 {
     color = vec4(0, 0, 0, 1);
+    vec3 matColor;
+    if(hasTexture == 0)
+    {
+        matColor = material.color;
+    }
+    else
+    {
+        matColor = texture(sampler, fragUV).rgb;
+    }
+
     for(int i = 0; i < NR_LIGHTS; i++)
     {
         Light light = lights[i];
-        vec4 ambient = vec4(light.ambient * material.color, 0.0);
+        vec4 ambient = vec4(light.ambient * matColor, 0.0);
         vec4 diffuse = vec4(0.0);
         vec4 specular = vec4(0.0);
 
@@ -44,7 +55,7 @@ void main()
 
         if( iDif > 0 )
         {
-            diffuse = iDif * vec4(light.diffuse * material.color, 1);
+            diffuse = iDif * vec4(light.diffuse * matColor, 1);
 
             vec3 V = normalize(- fragPos);
             vec3 H = normalize(L + V);

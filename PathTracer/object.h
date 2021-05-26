@@ -30,7 +30,7 @@ public:
     std::vector <unsigned int> getIndices();
     std::vector <QVector3D> getVertices(QMatrix4x4 matrix = QMatrix4x4());
     std::vector <QVector3D> getNormals(QMatrix4x4 matrix = QMatrix4x4());
-    std::vector <QVector3D> getTexCoordinates();
+    std::vector<QVector2D> getTexCoordinates();
 
     Material getMaterial();
 
@@ -38,10 +38,11 @@ public:
 
     ObjectType getObjectType();
     
-    void setTexture(QString path);
+    virtual void setTexture(QString path);
 
 
 protected:
+    virtual void createTexture();
 
     /**
      * @brief OpenGL program used to render meshes without shading.
@@ -59,7 +60,7 @@ protected:
     std::vector<QVector3D> _points;
     std::vector<unsigned int> _indices;
     std::vector<QVector3D> _normals;
-    std::vector<QVector3D> _texCoords;
+    std::vector<QVector2D> _texCoords;
 
     ObjectType _type;
 };

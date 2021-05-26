@@ -56,7 +56,15 @@ PathTracerGPU::~PathTracerGPU()
 
 void PathTracerGPU::createScene()
 {
+    QMatrix4x4 rot, trans, scale;
 
+    //rot.rotate(180, QVector3D(1, 0 , 0));
+
+   scale.scale(QVector3D(0, height()/2, 0));
+
+    Plane *backScenePlane =  new Plane(trans, rot, scale);
+    backScenePlane->setTexture(":/textures/Texturas/Ceu.jpg");
+    _objects.push_back(backScenePlane);
 }
 
 

@@ -1,4 +1,5 @@
 #include "trianglemesh.h"
+#include <QGLWidget>
 
 TriangleMesh::TriangleMesh(std::vector<QVector3D> &points,
 std::vector<unsigned int> &indices,
@@ -33,6 +34,12 @@ void TriangleMesh::initialize()
 
     createBuffers();
     createVAO();
+
+    if(_material.hasTexture())
+    {
+        createTexture();
+        updateTexBuffer();
+    }
 }
 
 template<class T> void setUniformArrayValue(QOpenGLShaderProgram *program,
@@ -55,14 +62,7 @@ void TriangleMesh::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMa
     _program->bind();
     _vao.bind();
     updateVertexBuffer();
-
-
-
-//    _program->setUniformValue("light.position", viewMatrix*QVector3D(5, -5, 5) );
-//    _program->setUniformValue("light.ambient", QVector3D(0.3f, 0.3f, 0.3f));
-//    _program->setUniformValue("light.diffuse", QVector3D(1.0f, 1.0f, 1.0f));
-//    _program->setUniformValue("light.specular", QVector3D(1.0f,  1.0f,1.0f));
-//    _program->setUniformValue("light.shininess", 24.0f);
+    updateTexBuffer();
 
     for (unsigned int i = 0; i < lights.size(); i++)
     {
@@ -82,6 +82,21 @@ void TriangleMesh::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMa
     _program->setUniformValue("mvp", mvp);
     _program->setUniformValue("mv_ti", mv.inverted().transposed());
     _program->setUniformValue("mv", mv);
+
+    if(_material.hasTexture())
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureID);
+        int location = glGetUniformLocation(_program->programId(), "sampler");
+        glUniform1i(location, 0);
+        _program->setUniformValue("hasTexture", 1);
+    }
+    else
+    {
+        _program->setUniformValue("hasTexture", 0);
+
+    }
+
     glDrawElements(GL_TRIANGLES, (GLsizei) _indices.size(), GL_UNSIGNED_INT, 0);
 
     _vao.release();
@@ -119,6 +134,8 @@ void TriangleMesh::updateVertexBuffer()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numberOfBytes, _indices.data(), GL_STATIC_DRAW);
+
+    _texCoords.resize(_points.size());
 }
 
 
@@ -126,7 +143,7 @@ void TriangleMesh::updateVertexBuffer()
 void TriangleMesh::updateTexBuffer()
 {
     int size = static_cast<int>(_texCoords.size());
-    int numberOfBytes = size * static_cast<int>(sizeof(float));
+    int numberOfBytes = size * static_cast<int>(sizeof(QVector2D));
 
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, numberOfBytes, _texCoords.data(), GL_STATIC_DRAW);
@@ -349,6 +366,30 @@ void TriangleMesh::normalizeNormals()
 
 
 
+void TriangleMesh::createTexture()
+{
+    //Criar a textura
+    glGenTextures(1, &_textureID);
+
+    //Linkar (bind) a textura criada
+    glBindTexture(GL_TEXTURE_2D, _textureID);
+
+    //Abrir arquivo de imagem com o Qt
+    QImage texImage = QGLWidget::convertToGLFormat(_material.getTexture());
+
+    //Enviar a imagem para o OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA,
+                 texImage.width(), texImage.height(),
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage.bits());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+
+
 void TriangleMesh::createVAO()
 {
     _vao.create();
@@ -366,7 +407,7 @@ void TriangleMesh::createVAO()
 
     //Add tex coords.
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordsBuffer);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(2);
 
     //Add elements.

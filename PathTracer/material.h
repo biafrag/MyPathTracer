@@ -18,7 +18,7 @@ public:
     QVector3D getEmission();
     float getSmoothness();
 
-    bool hasTexture();
+    const bool hasTexture();
     QImage getTexture();
 
     void setName(QString name);

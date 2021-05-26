@@ -147,6 +147,8 @@ void Sphere::render(const QMatrix4x4 &projMatrix, const QMatrix4x4 &viewMatrix, 
     _program->setUniformValue("mvp", mvp);
     _program->setUniformValue("mv_ti", mv.inverted().transposed());
     _program->setUniformValue("mv", mv);
+    _program->setUniformValue("hasTexture", static_cast<int>(_material.hasTexture()));
+
     glDrawElements(GL_TRIANGLES, (GLsizei) _indices.size(), GL_UNSIGNED_INT, 0);
 
     _vao.release();
@@ -184,6 +186,8 @@ void Sphere::updateVertexBuffer()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numberOfBytes, _indices.data(), GL_STATIC_DRAW);
+
+    _texCoords.resize(_points.size());
 }
 
 

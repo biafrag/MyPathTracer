@@ -8,7 +8,7 @@ uniform mat4 mvp;
 uniform mat4 mv;
 uniform mat4 mv_ti;
 
-out vec2 uvFrag;
+out vec2 fragUV;
 out vec3 fragPos;
 out vec3 fragNormal;
 
@@ -19,4 +19,6 @@ void main()
    fragPos = ( mv * vec4( vertexPos, 1 ) ).xyz;
 
    fragNormal = ( mv_ti * vec4( vertexNormal, 0 ) ).xyz;
+
+   fragUV = vertexTexCoord;
 }

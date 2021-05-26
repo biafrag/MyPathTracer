@@ -68,7 +68,7 @@ float Material::getSmoothness()
 
 
 
-bool Material::hasTexture()
+const bool Material::hasTexture()
 {
     return _hasTexture;
 }
