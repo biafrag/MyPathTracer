@@ -2,23 +2,23 @@
 
 #include <QVector3D>
 #include "renderer.h"
-#include "object.h"
-#include "light.h"
 #include "ray.h"
 #include "intersectionrecord.h"
+#include "scene.h"
+#include "tracer.h"
 
-class RayTracing
+class RayTracing : public Tracer
 {
 public:
 
+    /**
+     * @brief RayTracing
+     */
     RayTracing();
 
-    QImage generateRayTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam, std::vector<Object *> &objects, std::vector<Light> &lights, QVector3D backgroundColor);
-    QImage generateRayTracingImage2();
+    QImage generateRayTracingImageRecursionApproach(int w, int h, QMatrix4x4 model, Renderer::Camera cam, Scene scene, QVector3D backgroundColor);
+    QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam, Scene scene, QVector3D backgroundColor);
 
-    void setDimensions(int width, int height);
-
-    float getTime();
 
 private:
 
@@ -31,9 +31,9 @@ private:
 
     QVector3D getRayPoint(float t, Ray ray);
 
-    QVector3D getColorAt(IntersectRecord intersection, Ray ray, int indObj, int indVert = -1);
+    QVector3D getColorAtRecursive(IntersectRecord intersection, std::vector<Light> lights, Ray ray, int indObj, int indVert = -1);
 
-    QVector3D getColorAt2(QVector3D point, Ray &ray, Object *object, int indObj, float t, int indVert = -1);
+    QVector3D getColorAt(QVector3D point, std::vector<Light> lights, Ray &ray, Object *object, int indObj, float t, int indVert = -1);
 
     QVector3D calculateAmbient(IntersectRecord intersection, Light light, int ind1 = -1);
 
@@ -41,24 +41,9 @@ private:
 
     QVector3D calculatePhongSpecular(IntersectRecord intersection, Light light);
 
-
-private:
-
-    QMatrix4x4 _model;
-
-    QVector3D _Xe, _Ye, _Ze;
-
-    QVector3D _backgroundColor = {0, 0, 0};
-
+    /**
+     * @brief _camera
+     */
     Renderer::Camera _camera;
-
-    std::vector<Object *> _objects;
-
-    std::vector<Light> _lights;
-
-    int _width, _height;
-
-    float _time;
-
 };
 

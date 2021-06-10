@@ -1,18 +1,14 @@
 <RCC>
     <qresource prefix="/shaders">
-        <file>computeShader.glsl</file>
         <file>fragmentShader.glsl</file>
         <file>vertexShader.glsl</file>
     </qresource>
-
     <qresource prefix="/textures">
         <file>Texturas/Ground.jpg</file>
         <file>Texturas/Ceu.jpg</file>
         <file>Texturas/Sky.jpg</file>
         <file>Texturas/Ceu2.jpg</file>
         <file>Texturas/Sky4.jpg</file>
-
-
+        <file>Texturas/ImagemTeste.jpg</file>
     </qresource>
-
 </RCC>

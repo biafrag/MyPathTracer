@@ -67,44 +67,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>CPU/GPU</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="horizontalSlider">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximum">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+     <layout class="QHBoxLayout" name="horizontalLayout_4"/>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -150,9 +113,6 @@
            <string>TextLabel</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="PathTracerGPU" name="openGLWidget_2"/>
         </item>
        </layout>
       </item>
@@ -208,11 +168,6 @@
    <class>Renderer</class>
    <extends>QOpenGLWidget</extends>
    <header>renderer.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PathTracerGPU</class>
-   <extends>QOpenGLWidget</extends>
-   <header location="global">pathtracergpu.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

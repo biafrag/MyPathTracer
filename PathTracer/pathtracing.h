@@ -6,7 +6,9 @@
 #include "light.h"
 #include "ray.h"
 #include "intersectionrecord.h"
-class PathTracing
+#include "tracer.h"
+
+class PathTracing : public Tracer
 {
 public:
 
@@ -16,18 +18,8 @@ public:
      * @brief generatePathTracingImage
      * @return
      */
-    QImage generatePathTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                    std::vector<Object *> &objects, QVector3D backgroundColor = {0, 0, 0});
-
-    /**
-     * @brief getTime
-     * @return
-     */
-    float getTime();
-
-    void setRayNumber(unsigned int number);
-
-    void setDimensions(int width, int height);
+    QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
+                                    Scene scene, QVector3D backgroundColor = {0, 0, 0});
 
 
 private:
@@ -103,47 +95,6 @@ private:
     float clamp(float number, float low, float high);
 
 private:
-    /**
-     * @brief _model
-     */
-    QMatrix4x4 _model;
-
-    /**
-     * @brief _Xe
-     */
-    QVector3D _Xe;
-
-    /**
-     * @brief _Ye
-     */
-    QVector3D _Ye;
-
-    /**
-     * @brief _Ze
-     */
-    QVector3D _Ze;
-
-    QVector3D _backgroundColor = {0, 0, 0};
-
-    /**
-     * @brief _camera
-     */
-    Renderer::Camera _camera;
-
-    /**
-     * @brief _objects
-     */
-    std::vector<Object *> _objects;
-
-    /**
-     * @brief _width
-     */
-    int _width, _height;
-
-    /**
-     * @brief _time
-     */
-    float _time;
 
     /**
      * @brief _sphereSeed
@@ -154,12 +105,6 @@ private:
      * @brief _seed
      */
     float _seed;
-
-    /**
-     * @brief _rayNumber
-     */
-    unsigned int _rayNumber = 1;
-
 
 };
 

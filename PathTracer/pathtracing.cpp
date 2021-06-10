@@ -16,24 +16,23 @@ PathTracing::PathTracing()
 
 
 
-QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                             std::vector<Object *> &objects, QVector3D backgroundColor)
+QImage PathTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
+                                             Scene scene, QVector3D backgroundColor)
 {
     _model = model;
     _backgroundColor = backgroundColor,
-    _camera = cam;
-    _objects = objects;
+    _objects = scene.getObjects();
     _width = w;
     _height = h;
 
-    _Ze = (_camera.eye - cam.center).normalized();
-    _Xe = QVector3D::crossProduct(cam.up, _Ze).normalized();
-    _Ye = QVector3D::crossProduct(_Ze, _Xe);
+    QVector3D Ze = (cam.eye - cam.center).normalized();
+    QVector3D Xe = QVector3D::crossProduct(cam.up, Ze).normalized();
+    QVector3D Ye = QVector3D::crossProduct(Ze, Xe);
 
     QImage image(_width, _height, QImage::Format_RGB32);
 
     //a é a altura real
-    float a = 2 * _camera.zNear * tan(_camera.fov* (M_PI/180)/2.0);
+    float a = 2 * cam.zNear * tan(cam.fov* (M_PI/180)/2.0);
 
     //b é a largura real
     float b = (a * _width)/_height;
@@ -48,8 +47,8 @@ QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Re
             QVector3D totalColor = QVector3D(0, 0, 0);
 
             #pragma omp parallel for
-            int xAmount = sqrt(_rayNumber);
-            int yAmount = xAmount;
+            unsigned int xAmount = sqrt(_rayNumber);
+            unsigned int yAmount = xAmount;
             for (unsigned int aax = 0; aax < xAmount; aax++)
             {
                 for (unsigned int aay = 0; aay < yAmount; aay++)
@@ -58,7 +57,7 @@ QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Re
 
                     //Lance um raio
                      Ray ray;
-                     ray.origin = _camera.eye;
+                     ray.origin = cam.eye;
                      float factorY = (float)aay/((float)yAmount);
                      float factorX = (float)aax/((float)xAmount);
 
@@ -80,7 +79,7 @@ QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Re
                          factorX = (float)aax/((float)xAmount - 1);
                      }
                      //d é um vetor que vai do olho até a tela
-                     QVector3D d = (- _camera.zNear * _Ze) + (a*((((_height-y) + factorY)/(float)_height) - 0.5) * _Ye) + b * ((((float)x + factorX)/(float)_width) - 0.5) * _Xe;
+                     QVector3D d = (- cam.zNear * Ze) + (a*((((_height-y) + factorY)/(float)_height) - 0.5) * Ye) + b * ((((float)x + factorX)/(float)_width) - 0.5) * Xe;
                      ray.direction = d;
                     RayHit bestHit;
                     QVector3D energy;
@@ -126,32 +125,9 @@ QImage PathTracing::generatePathTracingImage(int w, int h, QMatrix4x4 &model, Re
 }
 
 
-
-float PathTracing::getTime()
-{
-    return _time;
-}
-
-
-
-void PathTracing::setRayNumber(unsigned int number)
-{
-    _rayNumber = number;
-}
-
-
-
-void PathTracing::setDimensions(int width, int height)
-{
-    _width = width;
-
-    _height = height;
-}
-
-
-
 float energy(QVector3D color)
 {
+    //Produto interno entre o vetor da cor e o vetor 1/3
     return QVector3D::dotProduct(color, QVector3D(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f));
 }
 
@@ -165,6 +141,7 @@ QVector3D PathTracing::getColorAt(RayHit &hit, Ray &ray)
         QVector3D min = QVector3D(std::min(aux.x(), hit.albedo.x()), std::min(aux.y(), hit.albedo.y()), std::min(aux.z(), hit.albedo.z()));
         QVector3D diffuse = 2 * min;
 
+        //Calcula chances de ser especular ou difusa (Número vai ser maior dependendo qual componente for maior)
         float specChance = energy(hit.specular);
         float diffChance = energy( min);
         float sum = specChance + diffChance;
@@ -224,6 +201,10 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
         float specChance = energy(hit.specular);
         float diffChance = energy(min);
 
+        float sum = specChance + diffChance;
+        specChance /= sum;
+        diffChance /= sum;
+
         // Roulette-select the ray's path
         float roulette = rand();
         if (roulette < specChance)
@@ -242,7 +223,7 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
         {
             // Diffuse reflection
             ray.origin = hit.position + hit.normal * 0.001f;
-            ray.direction = SampleHemisphere(hit.normal, 1.0f);
+            ray.direction = SampleHemisphere(hit.normal.normalized(), 1.0f);
             ray.energy *= (1.0f / diffChance) * min;
         }
         else
@@ -388,7 +369,6 @@ RayHit PathTracing::Trace(Ray ray)
             {
                 hit.t = t;
                 objectCloser = _objects[o];
-                //indexObject = o;
             }
         }
         else

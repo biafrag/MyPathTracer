@@ -1,4 +1,7 @@
 #include "object.h"
+/**
+ * @brief Object::Object
+ */
 
 Object::Object()
 {

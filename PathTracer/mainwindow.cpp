@@ -2,15 +2,23 @@
 #include "ui_mainwindow.h"
 #include "raytracing.h"
 #include "renderer.h"
+#include "scene.h"
 
+/**
+ * @brief MainWindow::MainWindow
+ * @param parent
+ */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    activeCPU(false);
-    activeGPU(true);
+    activeCPU(true);
+
+    Scene scene;
+    ui->openGLWidget->setScene(scene);
+
 }
 
 MainWindow::~MainWindow()
@@ -42,20 +50,6 @@ void MainWindow::on_pathTracingButton_clicked()
     ui->timeLabel->setText(QString::number(time) + " s");
 }
 
-void MainWindow::on_horizontalSlider_valueChanged(int value)
-{
-    if(value == 0)
-    {
-       activeCPU(true);
-       activeGPU(false);
-    }
-    else
-    {
-        activeGPU(true);
-        activeCPU(false);
-    }
-}
-
 
 
 void MainWindow::activeCPU(bool active)
@@ -67,11 +61,4 @@ void MainWindow::activeCPU(bool active)
     ui->timeFixedLabel->setVisible(active);
     ui->numberOfRaysLabel->setVisible(active);
     ui->timeLabel->setVisible(active);
-}
-
-
-
-void MainWindow::activeGPU(bool active)
-{
-    ui->openGLWidget_2->setVisible(active);
 }

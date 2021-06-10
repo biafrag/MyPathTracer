@@ -1,6 +1,8 @@
-
 #include "material.h"
 
+/**
+ * @brief Material::Material
+ */
 Material::Material()
 {
 
@@ -68,7 +70,7 @@ float Material::getSmoothness()
 
 
 
-const bool Material::hasTexture()
+ bool Material::hasTexture() const
 {
     return _hasTexture;
 }
@@ -143,7 +145,7 @@ void Material::setTexture(QImage texture)
 
  Material Material::Gold()
 {
-     Material m("Gold", QVector3D(0.0, 0.0, 0.0), QVector3D(0.7f, 0.7f, 0.7f), 51.2, 0.6, false);
+     Material m("Gold", QVector3D(0.0, 0.0, 0.0), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.6, false);
      m.setEmission(QVector3D(0.2, 0.2, 0.2));
      m.setSmoothness(0.8);
      return m;
@@ -153,14 +155,14 @@ void Material::setTexture(QImage texture)
 
  Material Material::Rubber()
 {
-     return Material("Rubber", QVector3D(0.4, 0, 0), QVector3D(1, 1, 1), 60, 1, false);
+     return Material("Rubber", QVector3D(0.8, 0.4, 0.4), QVector3D(1, 1, 1), 60, 1, false);
  }
 
 
 
  Material Material::Mirror()
  {
-     Material m("Mirror", QVector3D(0, 0, 0), QVector3D(1, 1, 1), 70, 0, false);
+     Material m("Mirror", QVector3D(0, 0, 0), QVector3D(1, 1, 1), 60, 0, false);
      m.setSmoothness(0);
 
      return m;

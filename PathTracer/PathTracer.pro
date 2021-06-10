@@ -20,12 +20,13 @@ SOURCES += \
     mainwindow.cpp \
     material.cpp \
     object.cpp \
-    pathtracergpu.cpp \
     pathtracing.cpp \
     plane.cpp \
     raytracing.cpp \
     renderer.cpp \
+    scene.cpp \
     sphere.cpp \
+    tracer.cpp \
     trianglemesh.cpp
 
 HEADERS += \
@@ -35,14 +36,15 @@ HEADERS += \
     mainwindow.h \
     material.h \
     object.h \
-    pathtracergpu.h \
     pathtracing.h \
     plane.h \
     ray.h \
     raytracing.h \
     readerOBJ.h \
     renderer.h \
+    scene.h \
     sphere.h \
+    tracer.h \
     trianglemesh.h
 
 FORMS += \
