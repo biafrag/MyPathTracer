@@ -332,10 +332,16 @@ void Scene::createLights()
     light2.specular = {0.3f, 0.3f, 0.3f};
     light2.shi = 60.0f;
 
+    Light light3;
+    light3.position = {150, -150, -150};
+    light3.ambient = {0.3f, 0.3f, 0.3f};
+    light3.diffuse = {0.8f, 0.8f, 0.8f};
+    light3.specular = {0.3f, 0.3f, 0.3f};
+    light3.shi = 60.0f;
 
     _lights.push_back(light1);
 
-    //_lights.push_back(light2);
+    _lights.push_back(light2);
 }
 
 

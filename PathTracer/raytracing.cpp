@@ -151,73 +151,73 @@ QVector3D RayTracing::getRayPoint(float t, Ray ray)
 
 QVector3D RayTracing::getColorAtRecursive(IntersectRecord intersection, std::vector<Light> lights, Ray ray, int indObj, int indVert)
 {
-    RayHit hit = intersection.hit;
-    QVector3D corF = _backgroundColor;
-    Object *object = intersection.object;
-    Material material = object->getMaterial();
+        RayHit hit = intersection.hit;
+      QVector3D corF = _backgroundColor;
+      Object *object = intersection.object;
+      Material material = object->getMaterial();
 
-    if(ray.timesReflection < 0)
-    {
-        return corF;
-    }
-    for(auto light : lights)
-    {
-        QVector3D N;
-        if(object->getObjectType() == ObjectType::SPHERE)
-        {
-            N = dynamic_cast<Sphere*>(object)->normalAt(hit.position);
-        }
-        else
-        {
-             TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
-             N = mesh->getNormalInsideTriangle(indVert, hit.position, _model);
-        }
-        intersection.hit.normal = N;
+      if(ray.timesReflection < 0)
+      {
+          return corF;
+      }
+      for(auto light : lights)
+      {
+          QVector3D N;
+          if(object->getObjectType() == ObjectType::SPHERE)
+          {
+              N = dynamic_cast<Sphere*>(object)->normalAt(hit.position);
+          }
+          else
+          {
+               TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(object);
+               N = mesh->getNormalInsideTriangle(indVert, hit.position, _model);
+          }
+          intersection.hit.normal = N;
 
 
-        if(material.getReflectivity() < 1.0)
-        {
-            Ray reflection_ray ;
-            reflection_ray.origin = hit.position;
-            reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
-            Object * objRef;
-            RayHit newHit;
-            IntersectRecord newIntersection;
+          if(material.getReflectivity() < 1.0)
+          {
+              Ray reflection_ray ;
+              reflection_ray.origin = hit.position;
+              reflection_ray.direction = ray.direction - 2 * N * QVector3D::dotProduct(ray.direction, N);
+              Object * objRef;
+              RayHit newHit;
+              IntersectRecord newIntersection;
 
-            unsigned int indObjRef, indVertRef;
-            objRef = reflection(reflection_ray, newHit.t, indObjRef, indVertRef, indObj);
-            newHit.position = hit.position + reflection_ray.direction * newHit.t;
+              unsigned int indObjRef, indVertRef;
+              objRef = reflection(reflection_ray, newHit.t, indObjRef, indVertRef, indObj);
+              newHit.position = hit.position + reflection_ray.direction * newHit.t;
 
-            if(objRef != nullptr)
-            {
-                newIntersection.hit = newHit;
-                newIntersection.object = objRef;
-                reflection_ray.timesReflection = ray.timesReflection - 1;
-                reflection_ray.energy = ray.energy * material.getSpecular();
-                QVector3D cor = getColorAtRecursive(newIntersection,lights, reflection_ray, indObjRef, indVertRef) ;
-                corF += cor;
+              if(objRef != nullptr)
+              {
+                  newIntersection.hit = newHit;
+                  newIntersection.object = objRef;
+                  reflection_ray.timesReflection = ray.timesReflection - 1;
+                  reflection_ray.energy = ray.energy * material.getSpecular();
+                  QVector3D cor = getColorAtRecursive(newIntersection, lights, reflection_ray, indObjRef, indVertRef) ;
+                  corF += cor;
 
-            }
+              }
 
-        }
-        bool hasNoEffect = hasObjectObstacle(light, intersection);
-        if(!hasNoEffect || material.getReflectivity() < 1 )
-        {
-            QVector3D diffuse = calculatePhongDiffuse(intersection, light, indVert); //Adicionar propriedade dos materiais do objeto depois
-            QVector3D specular = calculatePhongSpecular(intersection, light);
-            QVector3D ambient = calculateAmbient(intersection, light, indVert);
+          }
+          bool hasNoEffect = hasObjectObstacle(light, intersection);
+          if(!hasNoEffect || material.getReflectivity() < 1 )
+          {
+              QVector3D diffuse = calculatePhongDiffuse(intersection, light, indVert); //Adicionar propriedade dos materiais do objeto depois
+              QVector3D specular = calculatePhongSpecular(intersection, light);
+              QVector3D ambient = calculateAmbient(intersection, light, indVert);
 
-            QVector3D cor = ambient + diffuse + specular;
-            //cor = {1, 0, 0};
-            corF = (1 - material.getReflectivity()) * corF + cor  * material.getReflectivity() ;
-        }
-        else
-        {
-            QVector3D ambient = calculateAmbient(intersection, light, indVert);
-            corF = material.getReflectivity() * ambient;
-        }
-    }
-    return corF;
+              QVector3D cor = ambient + diffuse + specular;
+              //cor = {1, 0, 0};
+              corF = (1 - material.getReflectivity()) * corF + cor  * material.getReflectivity() ;
+          }
+          else
+          {
+              QVector3D ambient = calculateAmbient(intersection, light, indVert);
+              corF = material.getReflectivity() * ambient;
+          }
+      }
+      return corF;
 }
 
 
@@ -362,7 +362,7 @@ QVector3D RayTracing::calculatePhongSpecular(IntersectRecord intersection, Light
          {
              ispec = 0;
          }
-         specular = material.getSpecular() * light.specular * ispec;
+         specular = /*material.getSpecular() **/ light.specular * ispec;
      }
 
     return specular;
@@ -379,6 +379,7 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
     std::vector<Light> lights = scene.getLights();
     _width = w;
     _height = h;
+    _camera = cam;
     QImage image(_width, _height, QImage::Format_RGB32);
 
     QVector3D Ze = (cam.eye - cam.center).normalized();
@@ -401,26 +402,38 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
     {
         for(int x=0; x < _width; x++)
         {
-            QVector3D totalColor = QVector3D(_backgroundColor.x() * 255, _backgroundColor.y() * 255, _backgroundColor.z() * 255);
-            for (unsigned int aax = 0; aax < aadepth; aax++)
+            QVector3D totalColor = QVector3D(0, 0, 0);
+            unsigned int xAmount = sqrt(_rayNumber);
+            unsigned int yAmount = xAmount;
+            for (unsigned int aax = 0; aax < xAmount; aax++)
             {
-                for (unsigned int aay = 0; aay < aadepth; aay++)
+                for (unsigned int aay = 0; aay < yAmount; aay++)
                 {
                     //Lance um raio
                      Ray cameraPixelRay;
                      cameraPixelRay.origin = cam.eye;
+                     float factorY = (float)aay/((float)yAmount);
+                     float factorX = (float)aax/((float)xAmount);
 
-                     float factor = (float)aax/((float)aadepth);
-                     if(aadepth == 1)
+                     if(yAmount == 1)
                      {
-                         factor = 0;
+                         factorY = 0;
                      }
                      else
                      {
-                         factor = (float)aax/((float)aadepth - 1);
+                         factorY = (float)aay/((float)yAmount - 1);
+                     }
+
+                     if(xAmount == 1)
+                     {
+                         factorX = 0;
+                     }
+                     else
+                     {
+                         factorX = (float)aax/((float)xAmount - 1);
                      }
                      //d é um vetor que vai do olho até a tela
-                     QVector3D d = (- cam.zNear * Ze) + (a*((((_height-y) + factor)/(float)_height) - 0.5) * Ye) + b * ((((float)x + factor)/(float)_width) - 0.5) * Xe;
+                     QVector3D d = (- cam.zNear * Ze) + (a*((((_height-y) + factorY)/(float)_height) - 0.5) * Ye) + b * ((((float)x + factorX)/(float)_width) - 0.5) * Xe;
 
                     cameraPixelRay.direction = d;
 
@@ -481,12 +494,12 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                     }
                     else
                     {
-                        totalColor = _backgroundColor;
+                        totalColor += _backgroundColor;
                     }
                 }
             }
 
-            QVector3D finalColor = totalColor/aadepth*aadepth;
+            QVector3D finalColor = totalColor/_rayNumber;
             image.setPixelColor(x, y, QColor(std::fmin(finalColor.x() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.y() * 255/(aadepth*aadepth), 255), std::fmin(finalColor.z() * 255/(aadepth*aadepth), 255)));
         }
     }
