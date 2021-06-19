@@ -10,51 +10,15 @@
 
 #define M_PI 3.1415
 
+/**
+ * @brief RayTracing
+ *
+ * The RayTracing class has some functions that helps the implementation of the ray tracing algorithm.
+ *
+ * @author Bianca Fragoso
+ */
 RayTracing::RayTracing()
 {
-}
-
-
-
-QVector3D RayTracing::getBaricentricCoordinates(QVector3D p1, QVector3D p2, QVector3D p3, QVector3D point)
-{
-    float A1, A2, A3, At;
-    float alfa1, alfa2, alfa3;
-
-    QVector3D normal = QVector3D::crossProduct(p3 - p1, p2 - p1);
-    A1 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p1, p2 - p1))/2.0;
-    A2 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p2, p3 - p2))/2.0;
-    A3 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p3, p1 - p3))/2.0;
-    At = QVector3D::dotProduct(normal, QVector3D::crossProduct(p2 - p3, p1 - p3))/2.0;
-    alfa3 = A1/At;
-    alfa1 = A2/At;
-    alfa2 = A3/At;
-
-    return QVector3D(alfa1, alfa2, alfa3);
-}
-
-
-
-bool RayTracing::triangleVerification(QVector3D p1, QVector3D p2, QVector3D p3, QVector3D point)
-{
-    float A1, A2, A3, At;
-    float alfa1, alfa2, alfa3;
-
-    QVector3D normal = QVector3D::crossProduct(p3 - p1, p2 - p1);
-    A1 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p1, p2 - p1))/2.0;
-    A2 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p2, p3 - p2))/2.0;
-    A3 = QVector3D::dotProduct(normal, QVector3D::crossProduct(point - p3, p1 - p3))/2.0;
-    At = QVector3D::dotProduct(normal, QVector3D::crossProduct(p2 - p3, p1 - p3))/2.0;
-    alfa3 = A1/At;
-    alfa1 = A2/At;
-    alfa2 = A3/At;
-
-    //Para estar dentro as coordenadas baricêntricas precisam estar entre 0 e 1
-    if(alfa1 < 0 || alfa1 > 1 || alfa2 < 0 || alfa2 > 1 || alfa3 < 0 || alfa3 > 1 )
-    {
-        return false;
-    }
-    return true;
 }
 
 
@@ -141,12 +105,6 @@ Object * RayTracing::reflection(Ray ray, float &tCloser, unsigned int &indexObje
     return objectCloser;
 }
 
-
-
-QVector3D RayTracing::getRayPoint(float t, Ray ray)
-{
-    return ray.origin + (t * ray.direction);
-}
 
 
 QVector3D RayTracing::getColorAtRecursive(IntersectRecord intersection, std::vector<Light> lights, Ray ray, int indObj, int indVert)
@@ -480,7 +438,7 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                     if(tCloser < FLT_MAX)
                     {
 
-                        QVector3D point = getRayPoint(tCloser, cameraPixelRay);
+                        QVector3D point = cameraPixelRay.hit(tCloser);
 
                         RayHit hit;
                         hit.t = tCloser;
@@ -618,7 +576,7 @@ QImage RayTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Came
                         }
                     }
 
-                    QVector3D point = getRayPoint(tCloser, cameraPixelRay);
+                    QVector3D point = cameraPixelRay.hit(tCloser);
 
                     for (int i = 0; i < 8; i++)
                     {

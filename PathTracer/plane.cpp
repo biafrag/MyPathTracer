@@ -1,5 +1,14 @@
 #include "plane.h"
 
+/**
+ * @brief Plane
+ *
+ * The Plane class implements a plane that inherits from the triangle mesh because a
+ * plane its a mesh with 4 points and 2 triangles.
+ *
+ * @author Bianca Fragoso
+ */
+
 Plane::Plane()
 {
     _type = ObjectType::PLANE;

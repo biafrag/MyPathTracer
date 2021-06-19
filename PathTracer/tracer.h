@@ -5,6 +5,11 @@
 #include "ray.h"
 #include "renderer.h"
 
+/**
+ * @brief The Tracer class implements some functions to trace rays and generate images using them.
+ *
+ * @author Bianca Fragoso
+ */
 class Tracer
 {
 public:
@@ -14,52 +19,53 @@ public:
                                     Scene scene, QVector3D backgroundColor = {0, 0, 0}) = 0;
 
     /**
-     * @brief getTime
-     * @return
+     * @brief Gets the time that it taked to generate the last image.
+     * @return The time in seconds.
      */
     float getTime();
 
     /**
-     * @brief setRayNumber
-     * @param number
+     * @brief Sets the number of rays that will be traced by pixel.
+     * @param number The number of rays.
      */
     void setRayNumber(unsigned int number);
 
-    /**
-     * @brief setDimensions
-     * @param width
-     * @param height
-     */
-    void setDimensions(int width, int height);
-
 protected:
     /**
-     * @brief Trace
-     * @param ray
-     * @return
+     * @brief Traces a ray and finds out where it hits.
+     * @param ray The ray.
+     * @return A RayHit with the informations about where the ray hitted.
      */
     RayHit Trace(Ray ray);
 
 protected:
     /**
-     * @brief _model
+     * @brief The model matrix.
      */
     QMatrix4x4 _model;
 
+    /**
+     * @brief The background color.
+     */
     QVector3D _backgroundColor = {0, 0, 0};
 
     /**
-     * @brief _objects
+     * @brief The vector with the objects of the scene.
      */
     std::vector<Object *> _objects;
 
     /**
-     * @brief _width
+     * @brief The width of the screen that the image will be draw.
      */
-    int _width, _height;
+    int _width;
 
     /**
-     * @brief _time
+     * @brief The height of the screen that the image will be draw.
+     */
+    int _height;
+
+    /**
+     * @brief The time spended to draw a image.
      */
     float _time;
 

@@ -5,6 +5,13 @@
 #include "pathtracing.h"
 #include <ctime>
 
+/**
+ * @brief Renderer
+ *
+ * The Renderer class it's a class that renders and has other renderers using other render techniques.
+ *
+ * @author Bianca Fragoso
+ */
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
@@ -63,9 +70,9 @@ QVector3D Renderer::Points_Sphere(QVector3D pointT)
 {
     QVector3D pointf;
     double r,s;
-    pointf.setX((pointT.x()-(width()/2.0))/_radius);
-    pointf.setY((pointT.y()-(height()/2))/_radius);
-    r=pointf.x()*pointf.x()+pointf.y()*pointf.y();
+    pointf.setX((pointT.x() - (width()/2.0))/_radius);
+    pointf.setY((pointT.y() - (height()/2))/_radius);
+    r = pointf.x()*pointf.x()+pointf.y()*pointf.y();
 
     if(r>1.0)
     {
@@ -157,7 +164,6 @@ void Renderer::initializeGL()
     initializeOpenGLFunctions();
     makeCurrent();
 
-    //createScene();
     auto objects = _scene.getObjects();
     for(unsigned int i = 0; i < objects.size(); i++)
     {
@@ -191,6 +197,5 @@ void Renderer::resizeGL(int w, int h)
 {
     //Atualizar a viewport
     glViewport(0, 0, w, h);
-    _pathTracer->setDimensions(w, h);
     _radius = ((std::min(h,w)/2.0) - 1);
 }

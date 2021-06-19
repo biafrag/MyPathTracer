@@ -1,8 +1,13 @@
 #include "material.h"
 
 /**
- * @brief Material::Material
+ * @class Material
+ *
+ * The Material class is responsible to store properties of a material.
+ *
+ * @author Bianca Fragoso
  */
+
 Material::Material()
 {
 
@@ -126,7 +131,7 @@ void Material::setSmoothness(float smoothness)
 
 
 
-void Material::shininess(float shi)
+void Material::setShininess(float shi)
 {
     _shininess = shi;
 }

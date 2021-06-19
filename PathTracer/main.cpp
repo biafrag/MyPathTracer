@@ -3,11 +3,13 @@
 #include <QApplication>
 
 /**
- * @brief main
- * @param argc
- * @param argv
- * @return
+ * @brief Main
+ *
+ * The main function creates the  Qt application and the MainWindow of the software.
+ *
+ * @author Bianca Fragoso
  */
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

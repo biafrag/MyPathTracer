@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Renderer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -61,6 +61,48 @@
        <widget class="QLabel" name="timeLabel">
         <property name="text">
          <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Scenes:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButton_2">
+        <property name="text">
+         <string>Scene 1</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButton">
+        <property name="text">
+         <string>Scene 2</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButton_3">
+        <property name="text">
+         <string>Scene 3</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButton_4">
+        <property name="text">
+         <string>Scene 4</string>
         </property>
        </widget>
       </item>

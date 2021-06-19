@@ -6,11 +6,18 @@
 #include <chrono>
 #define M_PI 3.1415
 
+/**
+ * @brief Path Tracing
+ *
+ * The PathTracing class has some functions that helps the implementation of the path tracing algorithm.
+ *
+ * @author Bianca Fragoso
+ */
 PathTracing::PathTracing()
 {
-    std::srand(_sphereSeed); //use current time as seed for random generator
+    std::srand(_seed);
 
-    _seed = std::rand();
+    _randComplement = std::rand();
 }
 
 
@@ -132,55 +139,6 @@ float energy(QVector3D color)
 }
 
 
-QVector3D PathTracing::getColorAt(RayHit &hit, Ray &ray)
-{
-    if(hit.t < FLT_MAX)
-    {
-
-        QVector3D aux = QVector3D(1, 1, 1) - hit.specular;
-        QVector3D min = QVector3D(std::min(aux.x(), hit.albedo.x()), std::min(aux.y(), hit.albedo.y()), std::min(aux.z(), hit.albedo.z()));
-        QVector3D diffuse = 2 * min;
-
-        //Calcula chances de ser especular ou difusa (Número vai ser maior dependendo qual componente for maior)
-        float specChance = energy(hit.specular);
-        float diffChance = energy( min);
-        float sum = specChance + diffChance;
-        specChance /= sum;
-        diffChance /= sum;
-        // Roulette-select the ray's path
-        float roulette = rand();
-
-        if (roulette < specChance)
-        {
-            // Specular reflection
-            ray.origin = hit.position + hit.normal * 0.001f;
-
-            QVector3D reflect = ray.direction - 2 * hit.normal * QVector3D::dotProduct(ray.direction, hit.normal);
-            ray.direction = reflect;
-            float dot = clamp(QVector3D::dotProduct(hit.normal.normalized(), ray.direction.normalized() ), 0, 1);
-
-            ray.energy *= (1.0f / specChance) * hit.specular * dot;
-        }
-        else
-        {
-            // Diffuse reflection
-            //ray.origin = hit.position + hit.normal * 0.001f;
-            ray.direction = SampleHemisphere(hit.normal);
-            float dot = clamp(QVector3D::dotProduct(hit.normal, ray.direction), 0, 1);
-
-            ray.energy *= (1.0f / diffChance) * diffuse * dot;
-        }
-        return QVector3D(0, 0, 0);
-    }
-    else
-    {
-        ray.energy = QVector3D(0.0f, 0.0f, 0.0f);
-
-        return _backgroundColor;
-    }
-}
-
-
 
 float SmoothnessToPhongAlpha(float s)
 {
@@ -299,18 +257,14 @@ float PathTracing::rand()
 {
     float rand = std::rand();
     float number;
-    if(rand + _seed <= RAND_MAX)
+    if(rand + _randComplement <= RAND_MAX)
     {
-        number = ((float) (rand + _seed) / (RAND_MAX ));
-        if(number > 1 || number < 0)
-        {
-
-        }
-        _seed++;
+        number = ((float) (rand + _randComplement) / (RAND_MAX ));
+        _randComplement++;
         return number;
     }
     number = 1;
-    _seed = 0;
+    _randComplement = 0;
     return 1;
 
 }

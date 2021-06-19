@@ -4,15 +4,21 @@
 #include<trianglemesh.h>
 
 /**
- * @brief The Sphere class
+ * @brief The Sphere class implements a sphere.
+ * The sphere inherits from a TriangleMesh, but
+ * has some functions that improve the intersection calculus.
+ * So, there's no need to go through all the triangles testing
+ * if the ray intersected one of them. For a sphere a simpler test it's made.
+ *
+ * @author Bianca Fragoso
  */
 class Sphere : public TriangleMesh
 {
 public:
     /**
      * @brief Creates a sphere mesh with the given center and radius.
-     * @param center
-     * @param radius
+     * @param center The center of the sphere.
+     * @param radius The radius of the sphere.
      */
     Sphere(QVector3D center = QVector3D(0, 0, 0), float radius = 1.0);
 
@@ -44,6 +50,9 @@ private:
      */
     float _radius;
 
+    /**
+     * @brief The model matrix of the sphere.
+     */
     QMatrix4x4 _model;
 };
 

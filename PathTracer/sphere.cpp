@@ -1,6 +1,14 @@
 #include "sphere.h"
 #define M_PI 3.14159265358979323846
 
+/**
+ * @brief Sphere
+ *
+ * The Sphere class implements a sphere object.
+ *
+ * @author Bianca Fragoso
+ */
+
 int getIndex( int i, int j, int n )
 {
     return j + i * ( n + 1 );

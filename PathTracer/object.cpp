@@ -1,6 +1,10 @@
 #include "object.h"
 /**
- * @brief Object::Object
+ * @brief Object
+ *
+ * The Object class its an abstract class that implements an renderable object.
+ *
+ * @author Bianca Fragoso
  */
 
 Object::Object()

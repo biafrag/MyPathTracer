@@ -1,7 +1,13 @@
 #include "tracer.h"
 #include "sphere.h"
 #include "trianglemesh.h"
-
+/**
+ * @brief Tracer
+ *
+ * The Tracer class it's an abstract class that implements a tracer.
+ *
+ * @author Bianca Fragoso
+ */
 Tracer::Tracer()
 {
 
@@ -19,15 +25,6 @@ float Tracer::getTime()
 void Tracer::setRayNumber(unsigned int number)
 {
     _rayNumber = number;
-}
-
-
-
-void Tracer::setDimensions(int width, int height)
-{
-    _width = width;
-
-    _height = height;
 }
 
 

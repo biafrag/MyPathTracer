@@ -5,6 +5,14 @@
 #include "material.h"
 #include "readerOBJ.h"
 
+/**
+ * @brief Scene
+ *
+ * The Scene class implements a scene.
+ *
+ * @author Bianca Fragoso
+ */
+
 Scene::Scene()
 {
     createDefaultScene();
@@ -85,7 +93,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
 
     Sphere *s2 =  new Sphere(QVector3D(-3, 1, 0.5), 0.5);
     s2->setMaterial(material);
@@ -101,7 +109,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
 
     Sphere *s5 =  new Sphere(QVector3D(0, 2, 0.5), 0.5);
     s5->setMaterial(material);
@@ -116,7 +124,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
 
     Sphere *s6 =  new Sphere(QVector3D(3, -2, 0.5), 0.5);
     s6->setMaterial(material);
@@ -131,7 +139,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
     Sphere *s7 =  new Sphere(QVector3D(-3, -2, 0.5), 0.5);
     s7->setMaterial(material);
     _objects.push_back(s7);
@@ -143,7 +151,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
 
     material.setAlbedo( QVector3D(1, 0.3, 0.7));
     color = randVec();
@@ -154,7 +162,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
     Sphere *s3 =  new Sphere(QVector3D(3, 1, 0.5), 0.5);
     s3->setMaterial(material);
     _objects.push_back(s3);
@@ -178,7 +186,7 @@ void Scene::createDefaultScene()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
 
 
     Sphere *s4 =  new Sphere(QVector3D(0, -3, 0.5), 0.5);
@@ -332,12 +340,6 @@ void Scene::createLights()
     light2.specular = {0.3f, 0.3f, 0.3f};
     light2.shi = 60.0f;
 
-    Light light3;
-    light3.position = {150, -150, -150};
-    light3.ambient = {0.3f, 0.3f, 0.3f};
-    light3.diffuse = {0.8f, 0.8f, 0.8f};
-    light3.specular = {0.3f, 0.3f, 0.3f};
-    light3.shi = 60.0f;
 
     _lights.push_back(light1);
 
@@ -385,7 +387,7 @@ Material Scene::randomMaterial()
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
     material.setAlbedo(albedo);
     material.setSpecular(specular);
-    material.shininess(shi);
+    material.setShininess(shi);
     material.setEmission(QVector3D(emission, emission, emission));
 
     return material;

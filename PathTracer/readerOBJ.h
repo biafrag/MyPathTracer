@@ -8,6 +8,24 @@
 #include <QVector3D>
 #include <QVector2D>
 #include <sstream>
+
+/**
+* This ReaderOBJ header implements a reader os .OBJ files.
+* The function expects only triangle meshes as entrances.
+*
+*@author Bianca Fragoso
+*/
+
+/**
+ * @brief Reads .OBJ files and fill all the vectors with the points, normals, texture coordinates and indices.
+ * @param fileName The path of the file.
+ * @param points The vector that will be filled with 3D points.
+ * @param normals The vector that will be filled with the normals.
+ * @param texCoords The vector that will be filled with the texture coordinates.
+ * @param indexPointsTriangles The vector that will be filled with the points indices.
+ * @param indexNormalsTriangles The vector that will be filled with the normals indices.
+ * @param indexTexTriangles The vector that will be filled with the texture coordinate indices.
+ */
 void readFile(std::string fileName, std::vector<QVector3D>& points, std::vector<QVector3D>& normals, std::vector<QVector2D>& texCoords, std::vector<unsigned int>& indexPointsTriangles,std::vector<unsigned int>& indexNormalsTriangles, std::vector<unsigned int>& indexTexTriangles)
 {
     std::string line;
