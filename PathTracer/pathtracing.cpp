@@ -24,10 +24,10 @@ PathTracing::PathTracing()
 
 
 QImage PathTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                             Scene scene, QVector3D backgroundColor)
+                                             Scene scene)
 {
     _model = model;
-    _backgroundColor = backgroundColor,
+    _backgroundColor = scene.getBackgroundColor(),
     _objects = scene.getObjects();
     _width = w;
     _height = h;
@@ -107,7 +107,7 @@ QImage PathTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Cam
                 }
             }
 
-            QVector3D finalColor = totalColor/ _rayNumber;
+            QVector3D finalColor = totalColor/ (xAmount*yAmount);
 
             if(finalColor.x() < 0)
             {
@@ -171,7 +171,7 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
             ray.origin = hit.position + hit.normal * 0.001f;
             float alpha = SmoothnessToPhongAlpha(hit.smoothness);
             QVector3D reflect = ray.direction - 2 * hit.normal * QVector3D::dotProduct(ray.direction, hit.normal);
-            ray.direction = SampleHemisphere(reflect.normalized(), alpha);
+            ray.direction = sampleHemisphere(reflect.normalized(), alpha);
             float f = (alpha + 2) / (alpha + 1);
             float dot = clamp(QVector3D::dotProduct(hit.normal.normalized(), ray.direction.normalized()) * f, 0, 1);
 
@@ -181,7 +181,7 @@ QVector3D PathTracing::getColorFinalAt(RayHit &hit, Ray &ray)
         {
             // Diffuse reflection
             ray.origin = hit.position + hit.normal * 0.001f;
-            ray.direction = SampleHemisphere(hit.normal.normalized(), 1.0f);
+            ray.direction = sampleHemisphere(hit.normal.normalized(), 1.0f);
             ray.energy *= (1.0f / diffChance) * min;
         }
         else
@@ -207,7 +207,7 @@ QVector3D PathTracing::getColorDiffuseAt(RayHit &hit, Ray &ray)
     if(hit.t < FLT_MAX)
     {
         ray.origin = hit.position + hit.normal * 0.001f;
-        ray.direction = SampleHemisphere(hit.normal);
+        ray.direction = sampleHemisphere(hit.normal);
 
         QVector3D diffuse = 2 * hit.albedo;
 
@@ -271,14 +271,14 @@ float PathTracing::rand()
 
 
 
-QVector3D PathTracing::SampleHemisphere(QVector3D normal, float alpha)
+QVector3D PathTracing::sampleHemisphere(QVector3D normal, float alpha)
 {
     // Uniformly sample hemisphere direction
     float cosTheta = std::pow(rand(), 1.0/(alpha + 1));
     float sinTheta = sqrt(std::max(0.0f, 1.0f - cosTheta * cosTheta));
     float phi = 2 * M_PI * rand();
     QVector3D tangentSpaceDir = QVector3D(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-    QMatrix4x4 tangentSpaceMatrix =  GetTangentSpace(normal);
+    QMatrix4x4 tangentSpaceMatrix =  getTangentSpace(normal);
 
     // Transform direction to world space
     QVector3D result = (tangentSpaceDir * tangentSpaceMatrix);
@@ -287,7 +287,7 @@ QVector3D PathTracing::SampleHemisphere(QVector3D normal, float alpha)
 
 
 
-QMatrix4x4 PathTracing::GetTangentSpace(QVector3D normal)
+QMatrix4x4 PathTracing::getTangentSpace(QVector3D normal)
 {
     // Choose a helper vector for the cross product
     QVector3D helper = QVector3D(1, 0, 0);

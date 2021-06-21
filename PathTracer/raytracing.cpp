@@ -19,6 +19,7 @@
  */
 RayTracing::RayTracing()
 {
+    _count = std::vector<unsigned int>(4, 0);
 }
 
 
@@ -329,10 +330,15 @@ QVector3D RayTracing::calculatePhongSpecular(IntersectRecord intersection, Light
 
 
 QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatrix4x4 model, Renderer::Camera cam,
-                                           Scene scene, QVector3D backgroundColor)
+                                           Scene scene)
 {
+    _count[0] = 0;
+    _count[1] = 0;
+    _count[2] = 0;
+    _count[3] = 0;
+
     _model = model;
-    _backgroundColor = backgroundColor,
+    _backgroundColor = scene.getBackgroundColor(),
     _objects = scene.getObjects();
     std::vector<Light> lights = scene.getLights();
     _width = w;
@@ -415,10 +421,19 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                                 tCloser = t;
                                 objectCloser = _objects[o];
                                 indexObject = o;
+                                _count[1]++;
                             }
                         }
                         else
                         {
+                            if(type == ObjectType::PLANE)
+                            {
+                                _count[2]++;
+                            }
+                            else
+                            {
+                                _count[3]++;
+                            }
                             TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
                             int indTri;
                             float t = mesh->intersectsWithRay(cameraPixelRay, _model, tCloser, indTri);
@@ -453,6 +468,7 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                     else
                     {
                         totalColor += _backgroundColor;
+                        _count[0]++;
                     }
                 }
             }
@@ -465,16 +481,18 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
     auto end = std::chrono::high_resolution_clock::now();
     _time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
+
+
     return image;
 }
 
 
 
 QImage RayTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                            Scene scene, QVector3D backgroundColor)
+                                            Scene scene)
 {
     _model = model;
-    _backgroundColor = backgroundColor,
+    _backgroundColor = scene.getBackgroundColor();
     _objects = scene.getObjects();
     std::vector<Light> lights = scene.getLights();
     _width = w;
@@ -603,5 +621,12 @@ QImage RayTracing::generateImage(int w, int h, QMatrix4x4 &model, Renderer::Came
     _time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
     return image;
+}
+
+
+
+std::vector<unsigned int> RayTracing::getCountVector()
+{
+    return  _count;
 }
 

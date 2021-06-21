@@ -101,6 +101,18 @@ public:
      */
     void setScene(Scene scene);
 
+    /**
+     * @brief Sets the eye, that represents the camera position.
+     * @param eye The new eye position.
+     */
+    void setEye(QVector3D eye);
+
+    /**
+     * @brief Gets the vector that counts the ray hit for each type of object.
+     * @return A vector with 4 elements, each representing the count for a type of object.
+     */
+    std::vector<unsigned int> getCountVector();
+
 private:
 
     /**
@@ -210,5 +222,10 @@ private:
      * @brief The ray tracer renderer.
      */
     PathTracing * _pathTracer;
+
+    /**
+     * @brief A boolean that indicates if the initialize function was already called.
+     */
+    bool _isInitialized = false;
 };
 

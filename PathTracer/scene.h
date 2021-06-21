@@ -35,11 +35,42 @@ public:
      */
     std::vector<Object *> getObjects();
 
-private:
     /**
-     * @brief Creates a default scene with some spheres and planes.
+     * @brief Gets the background color of the scene.
+     */
+    QVector3D getBackgroundColor();
+
+    /**
+     * @brief Creates the first default scene with some spheres and planes.
      */
     void createDefaultScene();
+
+    /**
+     * @brief Creates the second default scene with some spheres and planes.
+     */
+    void createDefaultScene2();
+
+    /**
+     * @brief Creates the third default scene with some spheres and planes.
+     */
+    void createDefaultScene3();
+
+    /**
+     * @brief Creates a scene with one plane.
+     */
+    void createOnlyPlane();
+
+    /**
+     * @brief Creates a scene with a bunny mesh, a plane and some spheres.
+     */
+    void createTriangleMeshAndPlaneAndSpheres();
+
+    /**
+     * @brief Creates an empty scene.
+     */
+    void createEmptyScene();
+
+private:
 
     /**
      * @brief Creates 2 lights for the scene.
@@ -80,5 +111,10 @@ private:
      * @brief The vector that stores pointers for the objects.
      */
     std::vector<Object *> _objects;
+
+    /**
+     * @brief The background color.
+     */
+    QVector3D _backgroundColor = QVector3D(1, 1, 1);
 };
 

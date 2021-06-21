@@ -148,28 +148,46 @@ void Material::setTexture(QImage texture)
 
 
 
- Material Material::Gold()
+ Material Material::SilverSmooth()
 {
-     Material m("Gold", QVector3D(0.0, 0.0, 0.0), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.6, false);
+     Material m("SilverSmooth", QVector3D(0.3, 0.3, 0.3), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.6, false);
      m.setEmission(QVector3D(0.2, 0.2, 0.2));
      m.setSmoothness(0.8);
      return m;
-}
+ }
+
+
+
+ Material Material::SilverNotSmooth()
+ {
+     Material m("SilverNotSmooth", QVector3D(0.7, 0.7, 0.7), QVector3D(0.7f, 0.7f, 0.7f), 60, 1, false);
+     m.setEmission(QVector3D(0.2, 0.2, 0.2));
+     m.setSmoothness(1);
+     return m;
+ }
 
 
 
  Material Material::Rubber()
 {
-     return Material("Rubber", QVector3D(0.8, 0.4, 0.4), QVector3D(1, 1, 1), 60, 1, false);
+     return Material("Rubber", QVector3D(0.8, 0.4, 0.4), QVector3D(0, 0, 0), 60, 1, false);
  }
 
 
 
  Material Material::Mirror()
  {
-     Material m("Mirror", QVector3D(0, 0, 0), QVector3D(1, 1, 1), 60, 0, false);
-     m.setSmoothness(0);
-
+     Material m("Mirror", QVector3D(0.3, 0.3, 0.3), QVector3D(1, 1, 1), 60, 0, false);
      return m;
 
+ }
+
+
+
+ Material Material::Light()
+ {
+     Material m("Light", QVector3D(1, 1, 1), QVector3D(0, 0, 0), 60, 1, false);
+     m.setEmission(QVector3D(1, 1, 1));
+
+     return m;
  }

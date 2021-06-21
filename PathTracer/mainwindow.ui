@@ -76,7 +76,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_2">
+       <widget class="QRadioButton" name="Scene1RadioButton">
         <property name="text">
          <string>Scene 1</string>
         </property>
@@ -86,23 +86,16 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton">
+       <widget class="QRadioButton" name="Scene2RadioButton">
         <property name="text">
          <string>Scene 2</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_3">
+       <widget class="QRadioButton" name="Scene3RadioButton">
         <property name="text">
          <string>Scene 3</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioButton_4">
-        <property name="text">
-         <string>Scene 4</string>
         </property>
        </widget>
       </item>
@@ -160,6 +153,13 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="TestePushButton">
+          <property name="text">
+           <string>Make Test</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">

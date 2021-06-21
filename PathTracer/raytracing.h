@@ -34,10 +34,9 @@ public:
      * @param model The model matrix.
      * @param cam The camera properties.
      * @param scene The scene with the objects that will be rendered.
-     * @param backgroundColor The background color.
      * @return A final image, result of the ray tracing recursive algorithm.
      */
-    QImage generateRayTracingImageRecursionApproach(int w, int h, QMatrix4x4 model, Renderer::Camera cam, Scene scene, QVector3D backgroundColor);
+    QImage generateRayTracingImageRecursionApproach(int w, int h, QMatrix4x4 model, Renderer::Camera cam, Scene scene);
 
     /**
      * @brief This is one of the main functions of this class, because it walks through
@@ -48,11 +47,15 @@ public:
      * @param model The model matrix.
      * @param cam The camera properties.
      * @param scene The scene with the objects that will be rendered.
-     * @param backgroundColor The background color.
      * @return A final image, result of the ray tracing recursive algorithm.
      */
-    QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam, Scene scene, QVector3D backgroundColor);
+    QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam, Scene scene);
 
+    /**
+     * @brief Gets the vector that counts the ray hit for each type of object.
+     * @return A vector with 4 elements, each representing the count for a type of object.
+     */
+    std::vector<unsigned int> getCountVector();
 
 private:
 
@@ -141,5 +144,14 @@ private:
      * as reference to render the image.
      */
     Renderer::Camera _camera;
+
+    /**
+     * @brief A vector with 4 elements.
+     * 1 element - stores the count of ray hits on the background.
+     * 2 element - stores the count of ray hits on spheres.
+     * 3 element - stores the count of ray hits on planes.
+     * 4 element - stores the count of ray hits on triangle meshes.
+     */
+    std::vector<unsigned int> _count;
 };
 

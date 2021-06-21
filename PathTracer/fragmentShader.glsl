@@ -61,7 +61,7 @@ void main()
             vec3 H = normalize(L + V);
 
             float iSpec = pow(max(dot(N,H),0.0), light.shininess);
-            //specular = iSpec * vec4(light.specular, 1); // * light.specular;
+            specular = iSpec * vec4(light.specular, 1); // * light.specular;
         }
 
         color += diffuse + ambient + specular;

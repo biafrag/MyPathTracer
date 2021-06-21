@@ -50,9 +50,38 @@ private slots:
     */
     void on_pathTracingButton_clicked();
 
+    /**
+     * @brief Alternates between scenes and runs the ray tracing algorithm for each scene,
+     * writing their informations on a log file.
+    */
+    void makeTest();
+
+    /**
+     * @brief The slot that is called when the radio button of the first scene is checked
+     * That makes the current scene be the first default scene.
+    */
+    void on_Scene1RadioButton_clicked();
+
+    /**
+     * @brief The slot that is called when the radio button of the second scene is checked
+     * That makes the current scene be the second default scene.
+    */
+    void on_Scene2RadioButton_clicked();
+
+    /**
+     * @brief The slot that is called when the radio button of the third scene is checked
+     * That makes the current scene be the third default scene.
+    */
+    void on_Scene3RadioButton_clicked();
+
+    /**
+     * @brief The slot that is called when the test button is pressed.
+    */
+    void on_TestePushButton_clicked();
+
 private:
     /**
      * @brief The UI associated with this window.
      */
-    Ui::MainWindow *ui;
+    Ui::MainWindow *_ui;
 };

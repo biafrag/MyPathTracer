@@ -33,11 +33,10 @@ public:
      * @param model The model matrix.
      * @param cam The camera properties.
      * @param scene The scene with the objects that will be rendered.
-     * @param backgroundColor The background color.
      * @return A final image, result of the path tracing algorithm.
      */
     QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                    Scene scene, QVector3D backgroundColor = {0, 0, 0});
+                                    Scene scene);
 
 
 private:
@@ -80,14 +79,14 @@ private:
      * @param alpha The number that determines the power of the cosine sampling.
      * @return A 3D vector with a random direction in the hemisphere.
      */
-    QVector3D SampleHemisphere(QVector3D normal, float alpha = 0);
+    QVector3D sampleHemisphere(QVector3D normal, float alpha = 0);
 
     /**
      * @brief Creates a matrix to transform to the tangent space (TBN).
      * @param normal The normal used to calculate the tangent and the bitangent.
      * @return The TBN matrix.
      */
-    QMatrix4x4 GetTangentSpace(QVector3D normal);
+    QMatrix4x4 getTangentSpace(QVector3D normal);
 
     /**
      * @brief Traces a ray and finds out where it hits.

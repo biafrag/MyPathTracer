@@ -12,6 +12,7 @@
  *
  * @author Bianca Fragoso
  */
+
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
@@ -41,7 +42,7 @@ Renderer::~Renderer()
 
 QImage Renderer::getRayTracedImage(float &time)
 {
-    QImage image = _rayTracer->generateRayTracingImageRecursionApproach(width(), height(), _model,  _camera, _scene, QVector3D(1, 1, 1));
+    QImage image = _rayTracer->generateRayTracingImageRecursionApproach(width(), height(), _model,  _camera, _scene);
     time = _rayTracer->getTime();
     return image;
 
@@ -51,7 +52,7 @@ QImage Renderer::getRayTracedImage(float &time)
 
 QImage Renderer::getPathTracedImage(float &time)
 {
-    QImage image = _pathTracer->generateImage(width(), height(), _model,  _camera, _scene, QVector3D(1, 1, 1));
+    QImage image = _pathTracer->generateImage(width(), height(), _model,  _camera, _scene);
     time = _pathTracer->getTime();
     return image;
 }
@@ -155,19 +156,48 @@ void Renderer::wheelEvent(QWheelEvent *event)
 void Renderer::setScene(Scene scene)
 {
     _scene = scene;
+    if(_isInitialized)
+    {
+        makeCurrent();
+
+        auto objects = _scene.getObjects();
+
+        for(unsigned int i = 0; i < objects.size(); i++)
+        {
+            objects[i]->initialize();
+        }
+    }
+    update();
+}
+
+
+
+void Renderer::setEye(QVector3D eye)
+{
+    _camera.eye = eye;
+}
+
+
+
+std::vector<unsigned int> Renderer::getCountVector()
+{
+    return _rayTracer->getCountVector();
 }
 
 
 
 void Renderer::initializeGL()
 {
-    initializeOpenGLFunctions();
-    makeCurrent();
-
-    auto objects = _scene.getObjects();
-    for(unsigned int i = 0; i < objects.size(); i++)
+    if(!_isInitialized)
     {
-        objects[i]->initialize();
+        initializeOpenGLFunctions();
+        makeCurrent();
+        _isInitialized = true;
+        auto objects = _scene.getObjects();
+        for(unsigned int i = 0; i < objects.size(); i++)
+        {
+            objects[i]->initialize();
+        }
     }
 }
 
@@ -175,7 +205,8 @@ void Renderer::initializeGL()
 
 void Renderer::paintGL()
 {
-    glClearColor(1, 1, 1, 1.0f);
+    QVector3D color = _scene.getBackgroundColor();
+    glClearColor(color.x(), color.y(), color.z(), 1.0f);
 
     _view.setToIdentity();
     _view.lookAt(_camera.eye, _camera.center, _camera.up);

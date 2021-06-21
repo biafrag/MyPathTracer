@@ -13,10 +13,25 @@
 class Tracer
 {
 public:
+
+    /**
+     * @brief The tracer default constructor.
+     */
     Tracer();
 
+    /**
+     * @brief This is one of the main functions of this class, because it walks through
+     * all the pixels to estimate their colors and generates the final image. It's implemented
+     * according to the child class.
+     * @param w The width of the screen that the image will be draw.
+     * @param h The height of the screen that the image will be draw.
+     * @param model The model matrix.
+     * @param cam The camera properties.
+     * @param scene The scene with the objects that will be rendered.
+     * @return A final image, result of the ray tracing recursive algorithm.
+     */
     virtual QImage generateImage(int w, int h, QMatrix4x4 &model, Renderer::Camera &cam,
-                                    Scene scene, QVector3D backgroundColor = {0, 0, 0}) = 0;
+                                    Scene scene) = 0;
 
     /**
      * @brief Gets the time that it taked to generate the last image.

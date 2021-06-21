@@ -7,7 +7,7 @@
  * @brief The material class implements an object material. A material has a name, an albedo, and
  * other important properties that describe a physic material. The material can also have
  * a texture. If it happens, a image with the texture is stored.
- * The class implements some pre factored materials like gold, mirror, rubber etc.
+ * The class implements some pre factored materials like silver, mirror, rubber etc.
  *
  * @author Bianca Fragoso
  */
@@ -137,7 +137,9 @@ public:
      * @brief Creates a material that has the exact properties to simulate Gold.
      * @return A static gold material.
      */
-    static Material Gold();
+    static Material SilverSmooth();
+
+    static Material SilverNotSmooth();
 
     /**
      * @brief Creates a material that has the exact properties to simulate Rubber.
@@ -151,6 +153,7 @@ public:
      */
     static Material Mirror();
 
+    static Material Light();
 
 
 private:

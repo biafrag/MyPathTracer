@@ -8,6 +8,7 @@
  *
  * @author Bianca Fragoso
  */
+
 TriangleMesh::TriangleMesh(std::vector<QVector3D> &points, std::vector<unsigned int> &indices, std::vector<QVector3D> &normals)
 {
     _type = ObjectType::MESH;
