@@ -138,13 +138,13 @@ void MainWindow::makeTest()
     myfile << "###################################################################################################" << std::endl;
     myfile << std::endl;
 
-    myfile << "######################################## Cena com Background, Malha de triângulos e Plano ###########################################################" << std::endl;
+    myfile << "######################################## Cena com Background, Malha de triângulos, Esferas e Plano ###########################################################" << std::endl;
     scene.createTriangleMeshAndPlaneAndSpheres();
     _ui->openGLWidget->setScene(scene);
     _ui->openGLWidget->getRayTracedImage(time);
 
     count = _ui->openGLWidget->getCountVector();
-    myfile << "Total of Rays: " << width *height << std::endl;
+    myfile << "Total of Rays: " << width * height << std::endl;
     myfile << "Background: " << count[0] << std::endl;
     myfile << "Sphere: " << count[1] << std::endl;
     myfile << "Plane: " << count[2] << std::endl;

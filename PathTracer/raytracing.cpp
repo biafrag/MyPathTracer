@@ -421,19 +421,10 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                                 tCloser = t;
                                 objectCloser = _objects[o];
                                 indexObject = o;
-                                _count[1]++;
                             }
                         }
                         else
                         {
-                            if(type == ObjectType::PLANE)
-                            {
-                                _count[2]++;
-                            }
-                            else
-                            {
-                                _count[3]++;
-                            }
                             TriangleMesh *mesh = dynamic_cast<TriangleMesh *>(_objects[o]);
                             int indTri;
                             float t = mesh->intersectsWithRay(cameraPixelRay, _model, tCloser, indTri);
@@ -452,6 +443,19 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
                     //Se o t que eu encontrei tiver intersectado algum objeto
                     if(tCloser < FLT_MAX)
                     {
+                        ObjectType type = _objects[indexObject]->getObjectType();
+                        if(type == ObjectType::SPHERE)
+                        {
+                            _count[1]++;
+                        }
+                        else if (type == ObjectType::PLANE)
+                        {
+                            _count[2]++;
+                        }
+                        else
+                        {
+                            _count[3]++;
+                        }
 
                         QVector3D point = cameraPixelRay.hit(tCloser);
 
@@ -481,6 +485,7 @@ QImage RayTracing::generateRayTracingImageRecursionApproach(int w, int h, QMatri
     auto end = std::chrono::high_resolution_clock::now();
     _time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     std::cout<<"Tempo levado: "<<_time<<" s"<<std::endl;
+    std::cout<<"Qt raios ideal: "<<_width * _height<<" s"<<std::endl;
 
 
     return image;

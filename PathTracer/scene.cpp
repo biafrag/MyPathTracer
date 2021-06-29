@@ -60,12 +60,7 @@ void Scene::createDefaultScene()
     Material material;
     material.setAlbedo(QVector3D(0.5, 0.5, 1));
     material.setSpecular(QVector3D(0, 0, 0));
-    //frontScenePlane->setMaterial(Material::Rubber());
     frontScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    //_objects.push_back(frontScenePlane);
-//    material.setAlbedo(QVector3D(0.5, 0, 0));
-    //material.color = QVector3D(1, 1, 1);
 
     // Albedo and specular color
     QVector3D color = randVec();
@@ -75,19 +70,10 @@ void Scene::createDefaultScene()
     QVector3D albedo, specular;
     albedo = metal ? QVector3D(0, 0, 0) : color;
     specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
-//    material.setAlbedo(albedo);
-//    material.setSpecular(specular);
-//    material.shininess(shi);
-
-//    specular = QVector3D(1,0,0);
-//    material.setSpecular(specular);
 
     Sphere *s =  new Sphere(QVector3D(0, 0, 1));
-   //s->setMaterial(Material::Gold());
-    //material.setEmission(QVector3D(0.5, 0.5, 0.5));
     Material m;
     m.setAlbedo(QVector3D(0.7, 0.7, 0));
-   // s->setMaterial(material);
     s->setMaterial(m);
     _objects.push_back(s);
 
@@ -108,7 +94,6 @@ void Scene::createDefaultScene()
     _objects.push_back(s2);
 
     material.setAlbedo( QVector3D(1, 0.3, 0.7));
-    //material.setEmission(QVector3D(0, 0, 0));
     color = randVec();
     prob = rand0x1();
     shi = rand30x200();
@@ -175,16 +160,6 @@ void Scene::createDefaultScene()
     s3->setMaterial(material);
     _objects.push_back(s3);
 
-//    color = randVec();
-//    prob = rand0x1();
-//    shi = rand30x200();
-//    metal = prob < 0.0f;
-//    albedo = metal ? QVector3D(0, 0, 0) : color;
-//    specular = metal ? color : QVector3D(0.04f, 0.04f, 0.04f);
-//    material.setAlbedo(albedo);
-//    material.setSpecular(specular);
-//    material.shininess(shi);
-
     material.setAlbedo( QVector3D(1, 0.3, 0.7));
     color = randVec();
     prob = rand0x1();
@@ -211,10 +186,8 @@ void Scene::createDefaultScene()
 
     Plane *backScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    //backScenePlane->setMaterial(Material::Rubber());
     backScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
-    //_objects.push_back(backScenePlane);
 
     rot.setToIdentity();
     rot.rotate(-90, QVector3D(0, 1 , 0));
@@ -229,11 +202,7 @@ void Scene::createDefaultScene()
     Plane *groundPlane =  new Plane(trans, rot, scale);
     Material groundMaterial;
 
-    //groundMaterial.setAlbedo(QVector3D(0.7, 0.4, 0.7));
     groundPlane->setMaterial(Material::Rubber());
-    //groundPlane->setMaterial(Material::Mirror());
-    //groundPlane->setTexture(":/textures/Texturas/Ground.jpg");
-    //groundPlane->setTexture(":/textures/Texturas/Sky4.jpg");
 
     _objects.push_back(groundPlane);
 
@@ -246,12 +215,7 @@ void Scene::createDefaultScene()
 
     Plane *leftScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    //leftScenePlane->setMaterial(Material::Rubber());
     leftScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-
-
-    //_objects.push_back(leftScenePlane);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -262,11 +226,7 @@ void Scene::createDefaultScene()
 
     Plane *rightScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    //rightScenePlane->setMaterial(Material::Rubber());
     rightScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    //_objects.push_back(rightScenePlane);
-
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 0 , 1));
@@ -277,10 +237,7 @@ void Scene::createDefaultScene()
 
     Plane *upScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 1));
-    //upScenePlane->setMaterial(Material::Rubber());
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-   //_objects.push_back(upScenePlane);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;
@@ -293,12 +250,8 @@ void Scene::createDefaultScene()
     std::vector<QVector2D> texCoords;
     std::vector<QVector3D> normals;
 
-//     //material.isReflective = true;
-//     //material.color = QVector3D(0.5,0.5,0.5);
-
     rot.setToIdentity();
     rot.rotate(45, QVector3D(0, 1 , 0));
-//    rot.rotate(-30, QVector3D(0, 0 , 1));
 
     trans.setToIdentity();
     trans.translate(QVector3D(0, -1, -2.5));
@@ -308,12 +261,6 @@ void Scene::createDefaultScene()
     Plane *meshPlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(0.6, 0.6, 0.6));
     meshPlane->setMaterial(material);
-    //leftScenePlane->setMaterial(Material::Rubber());
-    //meshPlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    //_objects.push_back(meshPlane);
-    //readFile("../PathTracer/Malhas/monkey3.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
-
 
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
 
@@ -321,11 +268,8 @@ void Scene::createDefaultScene()
     {
         t->computeNormals();
     }
-    //material = Material::Gold();
-    //material.setEmission(QVector3D(1, 1, 1));
     material.setAlbedo(QVector3D(0.6, 0.6, 0.9));
     t->setMaterial(material);
-    //_objects.push_back(t);
 }
 
 
@@ -471,10 +415,7 @@ void Scene::createDefaultScene2()
 
     Plane *leftScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    //leftScenePlane->setMaterial(Material::Rubber());
     leftScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    //_objects.push_back(leftScenePlane);
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 1 , 0));
@@ -485,11 +426,7 @@ void Scene::createDefaultScene2()
 
     Plane *rightScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 0));
-    //rightScenePlane->setMaterial(Material::Rubber());
     rightScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    //_objects.push_back(rightScenePlane);
-
 
     rot.setToIdentity();
     rot.rotate(90, QVector3D(0, 0 , 1));
@@ -500,10 +437,7 @@ void Scene::createDefaultScene2()
 
     Plane *upScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 1));
-    //upScenePlane->setMaterial(Material::Rubber());
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-   //_objects.push_back(upScenePlane);
 
     std::vector<QVector3D> points;
     std::vector<unsigned int> indicesTri;
@@ -516,9 +450,6 @@ void Scene::createDefaultScene2()
     std::vector<QVector2D> texCoords;
     std::vector<QVector3D> normals;
 
-     //material.isReflective = true;
-     //material.color = QVector3D(0.5,0.5,0.5);
-
     readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
 
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
@@ -527,11 +458,9 @@ void Scene::createDefaultScene2()
     {
         t->computeNormals();
     }
-    //material = Material::Gold();
     material.setEmission(QVector3D(1, 1, 1));
 
     t->setMaterial(material);
-   //_objects.push_back(t);
 }
 
 
@@ -543,7 +472,6 @@ void Scene::createDefaultScene3()
     scale.scale(QVector3D(100, 100, 100));
     rot.rotate(90, QVector3D(1, 0 , 0));
     trans.translate(QVector3D(0, -100, 0));
-    Plane *frontScenePlane=  new Plane(trans, rot, scale);
     Material material;
     material.setAlbedo(QVector3D(0.5, 0.5, 1));
     material.setSpecular(QVector3D(0, 0, 0));

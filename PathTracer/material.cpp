@@ -150,9 +150,9 @@ void Material::setTexture(QImage texture)
 
  Material Material::SilverSmooth()
 {
-     Material m("SilverSmooth", QVector3D(0.3, 0.3, 0.3), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.6, false);
+     Material m("SilverSmooth", QVector3D(0.3, 0.3, 0.3), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.5, false);
      m.setEmission(QVector3D(0.2, 0.2, 0.2));
-     m.setSmoothness(0.8);
+     m.setSmoothness(1);
      return m;
  }
 
@@ -160,9 +160,9 @@ void Material::setTexture(QImage texture)
 
  Material Material::SilverNotSmooth()
  {
-     Material m("SilverNotSmooth", QVector3D(0.7, 0.7, 0.7), QVector3D(0.7f, 0.7f, 0.7f), 60, 1, false);
+     Material m("SilverNotSmooth", QVector3D(0.7, 0.7, 0.7), QVector3D(0.7f, 0.7f, 0.7f), 60, 0.8, false);
      m.setEmission(QVector3D(0.2, 0.2, 0.2));
-     m.setSmoothness(1);
+     m.setSmoothness(0.8);
      return m;
  }
 
