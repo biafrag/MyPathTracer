@@ -438,29 +438,6 @@ void Scene::createDefaultScene2()
     Plane *upScenePlane =  new Plane(trans, rot, scale);
     material.setAlbedo(QVector3D(1, 1, 1));
     upScenePlane->setTexture(":/textures/Texturas/Sky4.jpg");
-
-    std::vector<QVector3D> points;
-    std::vector<unsigned int> indicesTri;
-    std::vector<unsigned int> indicesQuad;
-    std::vector<unsigned int> indicesNormalsTri;
-    std::vector<unsigned int> indicesNormalsQuad;
-    std::vector<unsigned int> indicesTexTri;
-    std::vector<unsigned int> indicesTexQuad;
-
-    std::vector<QVector2D> texCoords;
-    std::vector<QVector3D> normals;
-
-    readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
-
-    TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
-
-    if(normals.size() == 0)
-    {
-        t->computeNormals();
-    }
-    material.setEmission(QVector3D(1, 1, 1));
-
-    t->setMaterial(material);
 }
 
 
@@ -552,7 +529,7 @@ void Scene::createDefaultScene3()
     std::vector<QVector2D> texCoords;
     std::vector<QVector3D> normals;
 
-    readFile("../PathTracer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
+    readFile("../Renderer/Malhas/bunny2.obj", points, normals, texCoords, indicesTri,  indicesNormalsTri, indicesTexTri);
 
     TriangleMesh *t = new TriangleMesh(points, indicesTri, normals);
 

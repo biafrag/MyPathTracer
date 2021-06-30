@@ -105,7 +105,7 @@ void Renderer::mousePressEvent(QMouseEvent *event)
 
 
 
-void Renderer::mouseReleaseEvent(QMouseEvent *event)
+void Renderer::mouseReleaseEvent(QMouseEvent *)
 {
     _mousepress = false;
     update();
