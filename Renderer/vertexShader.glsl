@@ -1,3 +1,9 @@
+/**
+ * @brief The vertex shader gives sets the write position of the vertices.
+ *
+ * @author Bianca Fragoso
+ */
+
 #version 330 core
 
 layout(location = 0) in vec3 vertexPos;

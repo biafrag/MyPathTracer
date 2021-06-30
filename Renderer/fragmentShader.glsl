@@ -1,3 +1,8 @@
+/**
+ * @brief The fragment shader gives the color to the fragments.
+ *
+ * @author Bianca Fragoso
+ */
 #version 330 core
 struct Material
 {
@@ -15,7 +20,6 @@ struct Light
     float shininess;
 };
 
-//uniform Light light;
 uniform Material material;
 uniform int hasTexture;
 in vec3 fragPos;
@@ -25,7 +29,7 @@ uniform sampler2D sampler;
 
 const int NR_LIGHTS = 2;
 
-uniform Light lights[NR_LIGHTS]; //Vetor de luzes na posição do olho
+uniform Light lights[NR_LIGHTS];
 
 out vec4 color;
 void main()
